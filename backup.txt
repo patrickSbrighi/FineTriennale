@@ -1,0 +1,190 @@
+\documentclass[12pt,a4paper,openright,twoside]{book}
+\usepackage[utf8]{inputenc}
+\usepackage[italian]{babel} % Aggiunto per la sillabazione italiana
+\usepackage{disi-thesis}
+\usepackage{code-lstlistings}
+\usepackage{notes}
+\usepackage{shortcuts}
+\usepackage{acronym}
+
+\school{\unibo}
+\programme{Corso di Laurea in Ingegneria e Scienze Informatiche}
+\title{Oltre la Blockchain: Pagamenti Off-Chain e Lightning Network tra Scalabilità e Sicurezza}
+\author{Patrick Sbrighi}
+\date{\today}
+\subject{Crittografia}
+\supervisor{Prof. Luciano Margara}
+\session{III}
+\academicyear{2024-2025}
+
+% Definizione Acronimi
+\acrodef{HTLC}{Hashed Time-Lock Contract}
+\acrodef{PoW}{Proof-of-Work}
+\acrodef{LN}{Lightning Network}
+
+\mainlinespacing{1.241}
+
+\begin{document}
+
+\frontmatter\frontispiece
+
+\begin{abstract}	
+Questa tesi analizza il Lightning Network come soluzione al problema della scalabilità delle blockchain pubbliche, con particolare attenzione agli aspetti architetturali e di sicurezza. L’obiettivo è fornire una panoramica chiara dei meccanismi principali, evidenziandone vantaggi, limiti e possibili sviluppi futuri.
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+\tableofcontents   
+%----------------------------------------------------------------------------------------
+
+\mainmatter
+
+%----------------------------------------------------------------------------------------
+\chapter*{Introduzione}
+\addcontentsline{toc}{chapter}{Introduzione}
+%----------------------------------------------------------------------------------------
+Con la pubblicazione del whitepaper su Bitcoin da parte di Satoshi Nakamoto\cite{nakamoto2008bitcoin}, viene per la prima volta presentata la blockchain, una tecnologia innovativa che ha ridefinito le fondamenta dei sistemi distribuiti. Sfruttando tale innovazione viene mostrata la possibilità di trasferire valore su scala globale senza la necessità di intermediari fiduciari o autorità centrali. Questa architettura non rappresenta solamente un avanzamento a livello informatico, ma simboleggia anche un cambiamento sociale ed economico, infatti, per la prima volta, la fiducia viene spostata dalle istituzioni agli algoritmi crittografici, permettendo alle parti di cooperare direttamente senza la necessità di conoscersi e fidarsi reciprocamente.
+
+Tuttavia, questo sistema si basa su un registro distribuito mantenuto da una rete peer-to-peer, dove il consenso sullo stato dei fondi viene raggiunto attraverso un protocollo di gossip che diffonde in broadcast ogni transazione a tutti i partecipanti della rete. Tale approccio, sebbene garantisca sicurezza e decentralizzazione, impone pesanti limiti per quanto riguarda la capacità del sistema di gestire elevate quantità di transazioni.
+
+Nello schema originale di Bitcoin ciascun nodo deve validare e memorizzare ogni transazione che avviene a livello globale, il problema principale, infatti, risiede proprio in questo. Se si verificasse un aumento smisurato del numero di transazioni il sistema crollerebbe, mentre se si aumentasse dimensione dei blocchi inglobare più transazioni verrebbero richieste risorse computazionali e di archiviazione tali da escludere la maggior parte dei nodi domestici, portando inevitabilmente a una centralizzazione dei validatori e minando la natura trustless e decentralizzata del sistema.
+
+Per ovviare a tale problema, e superare quello che verrà definito come "trilemma della scalabilità", è emersa la necessità di sviluppare soluzioni di secondo livello. L'idea alla base è spostare la maggior parte delle transazioni "off-chain", ovvero al di fuori della blockchain principale, utilizzando quest'ultima non più come registro di ogni singola attività, ma come giudice finale e imparziale.
+
+Il Lightning Network rappresenta la proposta più promettente e diffusa. Si tratta di una rete di canali di pagamento bidirezionali che permette agli utenti di scambiare fondi istantaneamente e con commissioni minime, aggiornando i saldi privatamente e trasmettendo alla blockchain solo le transazioni di apertura e chiusura del canale. Inoltre, attraverso l'uso di appositi contratti, il Lightning Network consente di instradare pagamenti attraverso nodi intermedi in modo sicuro e senza che questi possano sottrarre i fondi.
+
+Malgrado ciò, come ogni sistema complesso, anche il Lightning Network presenta sfide architetturali. Se da un lato risolve il problema del throughput, dall'altro introduce nuove dinamiche legate alla liquidità, alla topologia della rete e a potenziali rischi di centralizzazione, dove pochi nodi potrebbero arrivare a gestire una porzione significativa del traffico.
+
+\section*{Struttura della tesi}
+
+La struttura dell'elaborato sarà quindi la seguente:
+\begin{itemize}
+    \item Il \textbf{Capitolo 1} analizza le limitazioni strutturali delle blockchain pubbliche e il trilemma della scalabilità, ponendo le basi per la necessità di soluzioni off-chain.
+    \item Il \textbf{Capitolo 2} introduce le primitive crittografiche essenziali per i protocolli di secondo livello, come le funzioni di hash, le firme digitali e i timelocks.
+    \item Il \textbf{Capitolo 3} esamina il ruolo di Bitcoin come livello base, focalizzandosi su come la blockchain garantisca la sicurezza dei fondi gestiti nei livelli superiori.
+    \item Il \textbf{Capitolo 4} descrive nel dettaglio l'architettura dei canali di pagamento, spiegando i meccanismi di apertura, aggiornamento e chiusura, nonché le strategie per prevenire frodi tra le controparti.
+    \item Il \textbf{Capitolo 5} estende l'analisi dal singolo canale all'intera rete Lightning, illustrando come avviene il routing dei pagamenti attraverso nodi intermedi preservando la privacy e la sicurezza.
+    \item Infine, il \textbf{Capitolo 6} discute i limiti attuali della tecnologia, presentando un'analisi critica sulla centralizzazione della rete e sulle vulnerabilità sistemiche, delineando le possibili linee di ricerca futura.
+\end{itemize}
+
+%----------------------------------------------------------------------------------------
+\chapter{Scalabilità delle blockchain e limiti strutturali}
+%----------------------------------------------------------------------------------------
+Le blockchain pubbliche, e Bitcoin in particolare, hanno dimostrato che è possibile ottenere consenso distribuito in un ambiente privo di fiducia reciproca. Esse hanno introdotto un grande cambio di paradigma nella gestione del valore digitale. Tuttavia, questa nuova soluzione architetturale comporta costi significativi in termini di efficienza.
+
+In questo capitolo verranno analizzati i principi fondamentali che garantiscono la sicurezza di tali sistemi, ponendo l'attenzione a come gli stessi meccanismi di ridondanza e verifica diffusa, necessari per la decentralizzazione, ne limitino strutturalmente la scalabilità. Verrà presentato il cosiddetto "Trilemma della Scalabilità" e si osserverà come un'adozione globale dell'approccio on-chain renda necessaria l'introduzione di soluzioni di secondo livello, per colpa delle limitazioni fisiche di banda e della latenza.
+
+\section{Evoluzione e principi fondamentali delle criptovalute}
+Ad oggi, la maggior parte delle transazioni su Internet, e la totalità di esse prima del 2008, avviene tramite l'ausilio di terze entità fidate, quali banche o istituti finanziari, su cui ogni nodo della rete pone la propria fiducia. Sebbene questo modello sia ampiamente funzionante, presenta tutte le debolezze tipiche dei modelli \textbf{trust-based}. Le transazioni infatti non possono essere irreversibili perché gli istituti finanziari devono poter gestire eventuali dispute tra utenti, ma questo rende il denaro elettronico meno \textit{finale} rispetto a quello fisico e crea incertezza per i venditori. Gestire problemi, rimborsi e controlli antifrode genera dei costi aggiuntivi che ogni utente paga sotto forma di \textit{commissioni} rendendo i micropagamenti economicamente sconvenienti. Infine la presenza di un ente centrale rappresenta un \textbf{single point of failure}, ossia un punto critico la cui compromissione può compromettere l'intero sistema.~\cite{nakamoto2008bitcoin}
+
+Lo scopo principale delle criptovalute è invece quello di operare in un ambiente decentralizzato, senza alcuna autorità centrale, basato sulla crittografia, nel quale due nodi della rete possono effettuare delle transazioni tra loro senza la necessità di fidarsi di un intermediario. Le transazioni sono computazionalmente impossibili da invertire e il sistema \textbf{blockchain} protegge dalle frodi sia venditori che i clienti. La validità di ogni operazione è garantita tramite calcoli matematici complessi e può essere verificata da chiunque in qualsiasi momento. La crittografia sostituisce quindi la fiducia verso gli intermediari con una prova matematica, non è necessario fidarsi di banche o istituti finanziari perché la correttezza di ogni operazione è verificabile pubblicamente.\cite{nakamoto2008bitcoin}
+
+La \textbf{blockchain} è una combinazione di elementi crittografici di base come le \textbf{funzioni di hash}, le \textbf{firme digitali} e i protocolli di \textbf{consenso distribuito} (\textit{proof-of-work}), che interagiscono tra loro per creare un sistema sicuro di registrazione delle transazioni.\cite{nakamoto2008bitcoin}
+Come evidenziato da Narayanan e Clark \cite{narayanan2017bitcoin}, l'innovazione di Nakamoto non risiede nell'invenzione di nuove primitive crittografiche, quanto nell'aver combinato in modo ingegnoso strumenti preesistenti, con un sistema di incentivi economici, creando il primo sistema realmente funzionante e autonomo.
+
+Il cuore della blockchain su cui si basa Bitcoin è il \textbf{protocollo di gossip}, in cui tutte le modifiche che vengono apportate al registro delle transazioni vengono inviate in broadcast a tutti i nodi partecipanti alla rete. A causa di questo la blockchain di Bitcoin da sola non è in grado di gestire tutte le transazioni che avvengono quotidianamente nel mercato mondiale. Visa, uno dei principali circuiti di pagamento mondiali, utilizzato in oltre duecento paesi, è in grado di gestire picchi di 47000 transazioni al secondo, arrivando quindi ad una media di centinaia di milioni di transazioni al giorno\cite{alston2021constitutions}. Bitcoin, allo stato originale, è in grado di gestire solamente 7 transazioni al secondo, con blocchi di dimensione massima di 1 megabyte. Assumendo di poter avere i blocchi di dimensione infinita, e supponendo di utilizzare circa 300 bytes per ogni transazioni, per attuare la mole di lavoro gestita da Visa, Bitcoin genererebbe blocchi da 8 gigabytes ogni 10 minuti, arrivando quindi a 400 terabyte di dati all'anno.\cite{poon2016lightning}
+
+Chiaramente nessun personal computer sarebbe in grado di gestire tale catena, né a livello di banda, né a livello di quantità di dati da elaborare. Se Bitcoin dovesse diventare il metodo più diffuso di pagamento online, la rete collasserebbe molto velocemente, oppure si creerebbe un fenomeno di estrema centralizzazione, in cui a gestire la rete sono solo i pochi nodi in grado di gestire quel volume di lavoro. Meno nodi gestiscono la rete e meno sarà accurato il registro delle transazioni, inoltre tali nodi potrebbero smettere di agire nell'interesse comune ed iniziare ad agire per il proprio interesse, aumentando i costi di transazione per poter agire scorrettamente. In casi estremi, i nodi non in grado di fare da miner, potrebbero affidare i loro fondi ai nodi più potenti, dandone loro la completa custodia.\cite{poon2016lightning}
+
+Diventa quindi fondamentale che, nel caso in cui Bitcoin diventi estremamente popolare, ogni personal computer, con una normale capacità di calcolo, sia in grado di competere per validare i vari blocchi, risolvendo le criticità che rendono possibile la centralizzazione, e dando modo alle persone di fidarsi di tale sistema.
+
+\section{Il trilemma della scalabilità nei sistemi decentralizzati}
+Con l’aumentare delle transazioni, le blockchain pubbliche diventano lente e costose, smettendo di essere un sistema affidabile. La sfida che si sta affrontando è quella di migliorare questi meccanismi senza però dover sacrificare nessuno dei principi fondamentali delle blockchain.
+
+Il \textbf{Trilemma della scalabilità} è un teorema coniato da Vitalik Buterin, cofondatore di Ethereum, che raggruppa i problemi principali a cui gli sviluppatori vanno incontro quando cercano di realizzare una nuova blockchain. Tali problemi sono tre e sono \textit{scalabilità}, \textit{decentralizzazione} e \textit{sicurezza}. Buterin afferma che queste tre siano le proprietà che una qualsiasi blockchain cerca di avere, e, affidandosi a tecniche semplici, sia possibile avere solo due di esse.\cite{buterin2021trilemma}
+
+Tali proprietà sono così definite:
+\begin{itemize}
+    \item \textbf{Scalabilità:} la blockchain deve essere in grado di elaborare un numero di transazioni maggiore rispetto a quelle che può verificare da solo un normale nodo.
+    \item \textbf{Decentralizzazione:} il sistema deve essere \textit{trustless}, non ci deve essere nessun nodo, o nessuno piccolo gruppo di nodi, in cui sia necessario porre la fiducia di ogni elemento della rete. Tale proprietà implica che il livello di fiducia tra i nodi debba essere ridotto al minimo.
+    \item \textbf{Sicurezza:} la blockchain deve riuscire a resistere al maggior numero possibile di nodi, partecipanti alla rete, che cercano di attaccarla. Idealmente tale resistenza dovrebbe arrivare almeno al 50\% dei nodi, anche se la catena è considerata valida da sopra il 25\%.
+\end{itemize}
+
+La scalabilità è strettamente collegata con la decentralizzazione, ed è il principio cardine sul quale si basano le blockchain, nonostante sia molto complicato ottenerlo.
+
+Mescolando le proprietà si ottengono tre diverse tipologie di sistemi, ognuno dei quali è costretto a sacrificare un principio, proprio come detto nel trilemma della scalabilità:
+\begin{itemize}
+    \item \textbf{Blockchain tradizionali:} si basano sul fatto che ogni partecipante alla rete sia un nodo a se stante in grado di validare ogni transazione. In questo modo si ottengono decentralizzazione e sicurezza, ma non la scalabilità. Di questa categoria fanno parte Bitcoin, Litecoin e altre catene simili.
+    \item \textbf{Catene high-TPS:} si basano su un numero limitato di nodi, tipicamente tra 10 e 100, che mantengono il consenso tra di loro, gli altri nodi della rete devono fidarsi della maggior parte di questi nodi. Questa soluzione ottiene scalabilità e sicurezza, ma è chiaro che non sia decentralizzata.
+    \item \textbf{Ecosistemi multi-chain:} si basa sul concetto di \textit{scalabilità orizzontale}, ossia la possibilità di avere più catene e di utilizzare un protocollo di comunicazione per farle comunicare tra loro. Questa soluzione risulta essere decentralizzata e scalabile, ma non sicura. Infatti ad un aggressore basterebbe ottenere la maggioranza dei nodi di consenso di una delle numerose catene per prenderne il controllo e generare problemi a valanga sulle altre.
+\end{itemize} \cite{buterin2021trilemma}
+
+La conclusione è che cercare di ottenere scalabilità a livello del protocollo di base, senza compromettere la decentralizzazione, è incredibilmente difficile con l'architettura attuale. Bitcoin ha scelto di non scendere a compromessi sulla sicurezza e sulla decentralizzazione; di conseguenza, la scalabilità deve essere ricercata altrove.
+
+\section{Off-chain e soluzioni di secondo livello}
+Considerando le criticità evidenziate dal \textit{Trilemma della scalabilità} enunciato precedentemente, la comunità scientifica e gli sviluppatori di Bitcoin hanno spostato la loro attenzione verso soluzioni che non richiedono modifiche al protocollo di base, detto \textit{layer 1}. L'idea è quella di fare in modo che la maggior parte delle transazioni avvenga \textbf{off-chain}, ovvero al di fuori della blockchain principale, andando di fatto a costruire un livello superiore in grado di gestire tali transazioni, detto \textit{layer 2}.
+
+Poon e Dryja \cite{poon2016lightning} introducono la possibilità di creare canali di pagamento tra due nodi partecipanti alla rete, che si scambiano denaro senza la necessità di registrare ogni transazione sulla blockchain. Se, per esempio, due nodi si scambiano denaro ogni giorno, e solo a loro interessa di queste transazioni ricorrenti, non è necessario che anche tutti gli altri nodi della catena siano sempre a conoscenza di ogni loro movimento. Così facendo si permette agli utenti di Bitcoin di attuare molteplici transazioni senza far collassare il sistema e senza rischiare di avere problemi di centralizzazione.
+
+La soluzione consiste quindi nel creare questi canali, detti \textbf{canali di micropagamento}, che consentono di inviare grandi quantità di fondi in modo decentralizzato. In questo modo Bitcoin può scalare fino a miliardi di transazioni giornaliere utilizzando la potenza di calcolo di un normale laptop odierno.
+
+I canali di micropagamento instaurano una relazione tra due parti, che aggiornano costantemente i propri saldi, evitando di passare sempre per la blockchain e registrando su di essa solo la transazione finale, figlia di tutte quelle precedenti avvenute off-chain. Questi canali non sono da intendere come reti separate da Bitcoin, ma rappresentano vere e proprie transazioni Bitcoin. Scegliendo di inviare sulla blockchain principale un'unica transazione permette ad entrambe le parti di garantire il proprio saldo sulla rete.
+
+Il funzionamento logico di base di questo meccanismo è il seguente:
+\begin{enumerate}
+    \item \textbf{Apertura:} Due nodi bloccano una somma di denaro comune in una transazione sulla blockchain. Questo è l'unico momento in cui la rete globale viene coinvolta inizialmente. Questa transazione di apertura viene chiamata \textit{Funding Transaction}.
+    \item \textbf{Operatività Off-Chain:} Le parti possono scambiarsi un numero illimitato di transazioni aggiornando privatamente la ripartizione dei fondi bloccati. Queste operazioni sono istantanee e non richiedono commissioni di mining, poiché sono semplici scambi di dati firmati crittograficamente tra i due utenti.
+    \item \textbf{Chiusura:} Quando le parti decidono di terminare la collaborazione, l'ultimo stato del bilancio viene inviato alla blockchain per la transazione finale.
+\end{enumerate}
+
+In questo modello, la blockchain non agisce più come un registro contabile di ogni singola transazione, ma assume il ruolo di un giudice imparziale che interviene solo in caso di disputa o alla fine del rapporto economico tra le parti.
+
+%----------------------------------------------------------------------------------------
+\chapter{Primitive crittografiche per i protocolli off-chain}
+%----------------------------------------------------------------------------------------
+In questo capitolo vengono richiamati i concetti fondamentali necessari per comprendere il funzionamento dei canali di pagamento.
+
+\section{Funzioni di hash crittografico e loro proprietà}
+\section{Firme digitali e firme multiple}
+\section{Vincoli temporali nelle transazioni}
+
+%----------------------------------------------------------------------------------------
+\chapter{Bitcoin come livello base di sicurezza}
+%----------------------------------------------------------------------------------------
+Nel Lightning Network, Bitcoin assume il ruolo di livello di sicurezza e di arbitro finale in caso di problemi.
+
+\section{Struttura delle transazioni}
+\section{Proof-of-Work: meccanismo di consenso e arbitraggio}
+\section{Transaction malleability e introduzione di SegWit}
+
+%----------------------------------------------------------------------------------------
+\chapter{Architettura e funzionamento dei canali di pagamento}
+%----------------------------------------------------------------------------------------
+I canali di pagamento permettono a due utenti di scambiarsi fondi più volte senza registrare ogni operazione sulla blockchain.
+
+\section{Apertura, gestione e chiusura di un canale}
+\section{Aggiornamento dello stato e meccanismi di sicurezza}
+\section{Gestione dei nodi offline e ruolo delle watchtower}
+
+%----------------------------------------------------------------------------------------
+\chapter{Dal singolo canale di pagamento alla rete Lightning}
+%----------------------------------------------------------------------------------------
+Collegando più canali tra loro è possibile costruire una rete di pagamenti globale.
+
+\section{Pagamenti attraverso nodi intermedi}
+\section{Routing dei pagamenti e diffusione delle informazioni}
+\section{Aspetti di privacy nel Lightning Network}
+
+%----------------------------------------------------------------------------------------
+\chapter{Limiti del Lightning Network e sviluppi futuri}
+%----------------------------------------------------------------------------------------
+Nonostante i vantaggi, il Lightning Network presenta ancora diversi limiti e criticità.
+
+\section{Topologia della rete e problemi di centralizzazione}
+\section{Vulnerabilità e attacchi}
+\section{Proposte di miglioramento e linee di ricerca}
+
+%----------------------------------------------------------------------------------------
+\chapter*{Conclusioni}
+\addcontentsline{toc}{chapter}{Conclusioni}
+%----------------------------------------------------------------------------------------
+In questa tesi è stato analizzato il Lightning Network come possibile soluzione al problema della scalabilità...
+
+%----------------------------------------------------------------------------------------
+% BIBLIOGRAPHY
+%----------------------------------------------------------------------------------------
+
+\backmatter
+\bibliographystyle{alpha}
+\bibliography{bibliography}
+
+\end{document}

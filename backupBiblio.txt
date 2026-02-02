@@ -1,0 +1,63 @@
+@misc{nakamoto2008bitcoin,
+  title={Bitcoin: A Peer-to-Peer Electronic Cash System},
+  author={Nakamoto, Satoshi},
+  year={2008},
+  url={https://bitcoin.org/bitcoin.pdf},
+  note={Whitepaper disponibile su bitcoin.org}
+}
+
+@misc{poon2016lightning,
+  title={The Bitcoin Lightning Network: Scalable Off-Chain Instant Payments},
+  author={Poon, Joseph and Dryja, Thaddeus},
+  year={2016},
+  month={January},
+  note={DRAFT Version 0.5.9.2},
+  url={https://lightning.network/lightning-network-paper.pdf}
+}
+
+@article{narayanan2017bitcoin,
+  title={Bitcoin's academic pedigree},
+  author={Narayanan, Arvind and Clark, Jeremy},
+  journal={Communications of the ACM},
+  volume={60},
+  number={12},
+  pages={36--45},
+  year={2017},
+  publisher={ACM New York, NY, USA}
+}
+
+@incollection{alston2021constitutions,
+  author      = {Alston, Eric},
+  title       = {Constitutions and Blockchains: Competitive Governance of Fundamental Rulesets},
+  booktitle   = {Handbook on Blockchain and Cryptocurrencies},
+  editor      = {Caton, James},
+  publisher   = {Routledge},
+  year        = {2021},
+  note        = {Original work published 2019},
+  url         = {https://ssrn.com/abstract=3358434}
+}
+
+@misc{buterin2021trilemma,
+  title={Why Sharding is Great: Demystifying the Scalability Trilemma},
+  author={Buterin, Vitalik},
+  year={2021},
+  month={April},
+  howpublished={\url{https://vitalik.eth.limo/general/2021/04/07/sharding.html}},
+  note={Accesso: 30 Gennaio 2025}
+}
+
+@book{stallings2017cryptography,
+  title={Cryptography and Network Security: Principles and Practice},
+  author={Stallings, William},
+  year={2017},
+  publisher={Pearson},
+  edition={7th}
+}
+
+@book{antonopoulos2017mastering,
+  title={Mastering Bitcoin: Programming the Open Blockchain},
+  author={Antonopoulos, Andreas M},
+  year={2017},
+  publisher={O'Reilly Media},
+  edition={2nd}
+}

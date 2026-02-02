@@ -46,7 +46,7 @@ Con la pubblicazione del whitepaper su Bitcoin da parte di Satoshi Nakamoto\cite
 
 Tuttavia, questo sistema si basa su un registro distribuito mantenuto da una rete peer-to-peer, dove il consenso sullo stato dei fondi viene raggiunto attraverso un protocollo di gossip che diffonde in broadcast ogni transazione a tutti i partecipanti della rete. Tale approccio, sebbene garantisca sicurezza e decentralizzazione, impone pesanti limiti per quanto riguarda la capacità del sistema di gestire elevate quantità di transazioni.
 
-Nello schema originale di Bitcoin ciascun nodo deve validare e memorizzare ogni transazione che avviene a livello globale, il problema principale, infatti, risiede proprio in questo. Se si verificasse un aumento smisurato del numero di transazioni il sistema crollerebbe, mentre se si aumentasse dimensione dei blocchi inglobare più transazioni verrebbero richieste risorse computazionali e di archiviazione tali da escludere la maggior parte dei nodi domestici, portando inevitabilmente a una centralizzazione dei validatori e minando la natura trustless e decentralizzata del sistema.
+Nello schema originale di Bitcoin ciascun nodo deve validare e memorizzare ogni transazione che avviene a livello globale, il problema principale, infatti, risiede proprio in questo. Se si verificasse un aumento smisurato del numero di transazioni il sistema crollerebbe, mentre se si aumentasse dimensione dei blocchi per inglobare più transazioni verrebbero richieste risorse computazionali e di archiviazione tali da escludere la maggior parte dei nodi domestici, portando inevitabilmente a una centralizzazione dei validatori e minando la natura trustless e decentralizzata del sistema.
 
 Per ovviare a tale problema, e superare quello che verrà definito come "trilemma della scalabilità", è emersa la necessità di sviluppare soluzioni di secondo livello. L'idea alla base è spostare la maggior parte delle transazioni "off-chain", ovvero al di fuori della blockchain principale, utilizzando quest'ultima non più come registro di ogni singola attività, ma come giudice finale e imparziale.
 
@@ -83,7 +83,7 @@ Come evidenziato da Narayanan e Clark \cite{narayanan2017bitcoin}, l'innovazione
 
 Il cuore della blockchain su cui si basa Bitcoin è il \textbf{protocollo di gossip}, in cui tutte le modifiche che vengono apportate al registro delle transazioni vengono inviate in broadcast a tutti i nodi partecipanti alla rete. A causa di questo la blockchain di Bitcoin da sola non è in grado di gestire tutte le transazioni che avvengono quotidianamente nel mercato mondiale. Visa, uno dei principali circuiti di pagamento mondiali, utilizzato in oltre duecento paesi, è in grado di gestire picchi di 47000 transazioni al secondo, arrivando quindi ad una media di centinaia di milioni di transazioni al giorno\cite{alston2021constitutions}. Bitcoin, allo stato originale, è in grado di gestire solamente 7 transazioni al secondo, con blocchi di dimensione massima di 1 megabyte. Assumendo di poter avere i blocchi di dimensione infinita, e supponendo di utilizzare circa 300 bytes per ogni transazioni, per attuare la mole di lavoro gestita da Visa, Bitcoin genererebbe blocchi da 8 gigabytes ogni 10 minuti, arrivando quindi a 400 terabyte di dati all'anno.\cite{poon2016lightning}
 
-Chiaramente nessun personal computer sarebbe in grado di gestire tale catena, né a livello di banda, né a livello di quantità di dati da elaborare. Se Bitcoin dovesse diventare il metodo più diffuso di pagamento online, la rete collasserebbe molto velocemente, oppure si creerebbe un fenomeno di estrema centralizzazione, in cui a gestire la rete sono solo i pochi nodi in grado di gestire quel volume di lavoro. Meno nodi gestiscono la rete e meno sarà accurato il registro delle transazioni, inoltre tali nodi potrebbero smettere di agire nell'interesse comune ed iniziare ad agire per il proprio interesse, aumentando i costi di transazione per poter agire scorrettamente. In casi estremi, i nodi non in grado di fare da miner, potrebbero affidare i loro fondi ai nodi più potenti, dandone loro la completa custodia.\cite{poon2016lightning}
+Chiaramente nessun personal computer sarebbe in grado di gestire tale catena, né a livello di banda, né a livello di quantità di dati da elaborare. Se Bitcoin dovesse diventare il metodo più diffuso di pagamento online, la rete collasserebbe molto velocemente, oppure si creerebbe un fenomeno di estrema centralizzazione, in cui a gestire la rete sono solo i pochi nodi in grado di gestire quel volume di lavoro. Meno nodi gestiscono la rete e meno sarà accurato il registro delle transazioni, inoltre tali nodi potrebbero smettere di agire nell'interesse comune ed iniziare ad agire per il proprio interesse, aumentando i costi di transazione per poter operare scorrettamente. In casi estremi, i nodi non in grado di fare da miner, potrebbero affidare i loro fondi ai nodi più potenti, dandone loro la completa custodia.\cite{poon2016lightning}
 
 Diventa quindi fondamentale che, nel caso in cui Bitcoin diventi estremamente popolare, ogni personal computer, con una normale capacità di calcolo, sia in grado di competere per validare i vari blocchi, risolvendo le criticità che rendono possibile la centralizzazione, e dando modo alle persone di fidarsi di tale sistema.
 
@@ -96,7 +96,7 @@ Tali proprietà sono così definite:
 \begin{itemize}
     \item \textbf{Scalabilità:} la blockchain deve essere in grado di elaborare un numero di transazioni maggiore rispetto a quelle che può verificare da solo un normale nodo.
     \item \textbf{Decentralizzazione:} il sistema deve essere \textit{trustless}, non ci deve essere nessun nodo, o nessuno piccolo gruppo di nodi, in cui sia necessario porre la fiducia di ogni elemento della rete. Tale proprietà implica che il livello di fiducia tra i nodi debba essere ridotto al minimo.
-    \item \textbf{Sicurezza:} la blockchain deve riuscire a resistere al maggior numero possibile di nodi, partecipanti alla rete, che cercano di attaccarla. Idealmente tale resistenza dovrebbe arrivare almeno al 50\% dei nodi, anche se la catena è considerata valida da sopra il 25\%.
+    \item \textbf{Sicurezza:} la blockchain deve riuscire a resistere al maggior numero possibile di nodi, partecipanti alla rete, che cercano di attaccarla. Idealmente tale resistenza dovrebbe arrivare almeno al 50\% dei nodi, anche se una catena è considerata valida da sopra il 25\%.
 \end{itemize}
 
 La scalabilità è strettamente collegata con la decentralizzazione, ed è il principio cardine sul quale si basano le blockchain, nonostante sia molto complicato ottenerlo.
@@ -108,7 +108,7 @@ Mescolando le proprietà si ottengono tre diverse tipologie di sistemi, ognuno d
     \item \textbf{Ecosistemi multi-chain:} si basa sul concetto di \textit{scalabilità orizzontale}, ossia la possibilità di avere più catene e di utilizzare un protocollo di comunicazione per farle comunicare tra loro. Questa soluzione risulta essere decentralizzata e scalabile, ma non sicura. Infatti ad un aggressore basterebbe ottenere la maggioranza dei nodi di consenso di una delle numerose catene per prenderne il controllo e generare problemi a valanga sulle altre.
 \end{itemize} \cite{buterin2021trilemma}
 
-La conclusione è che cercare di ottenere scalabilità a livello del protocollo di base, senza compromettere la decentralizzazione, è incredibilmente difficile con l'architettura attuale. Bitcoin ha scelto di non scendere a compromessi sulla sicurezza e sulla decentralizzazione; di conseguenza, la scalabilità deve essere ricercata altrove.
+La conclusione è che cercare di ottenere scalabilità a livello del protocollo di base, senza compromettere la decentralizzazione e la sicurezza, è incredibilmente difficile con l'architettura attuale. Bitcoin ha scelto di non scendere a compromessi sulla sicurezza e sulla decentralizzazione; di conseguenza, la scalabilità deve essere ricercata altrove.
 
 \section{Off-chain e soluzioni di secondo livello}
 Considerando le criticità evidenziate dal \textit{Trilemma della scalabilità} enunciato precedentemente, la comunità scientifica e gli sviluppatori di Bitcoin hanno spostato la loro attenzione verso soluzioni che non richiedono modifiche al protocollo di base, detto \textit{layer 1}. L'idea è quella di fare in modo che la maggior parte delle transazioni avvenga \textbf{off-chain}, ovvero al di fuori della blockchain principale, andando di fatto a costruire un livello superiore in grado di gestire tali transazioni, detto \textit{layer 2}.
@@ -117,13 +117,13 @@ Poon e Dryja \cite{poon2016lightning} introducono la possibilità di creare cana
 
 La soluzione consiste quindi nel creare questi canali, detti \textbf{canali di micropagamento}, che consentono di inviare grandi quantità di fondi in modo decentralizzato. In questo modo Bitcoin può scalare fino a miliardi di transazioni giornaliere utilizzando la potenza di calcolo di un normale laptop odierno.
 
-I canali di micropagamento instaurano una relazione tra due parti, che aggiornano costantemente i propri saldi, evitando di passare sempre per la blockchain e registrando su di essa solo la transazione finale, figlia di tutte quelle precedenti avvenute off-chain. Questi canali non sono da intendere come reti separate da Bitcoin, ma rappresentano vere e proprie transazioni Bitcoin. Scegliendo di inviare sulla blockchain principale un'unica transazione permette ad entrambe le parti di garantire il proprio saldo sulla rete.
+I canali di micropagamento instaurano una relazione tra due parti, che aggiornano costantemente i propri saldi, evitando di passare sempre per la blockchain e registrando su di essa solo la transazione finale, figlia di tutte quelle precedenti avvenute off-chain. Questi canali non sono da intendere come reti separate da Bitcoin, ma rappresentano vere e proprie transazioni Bitcoin. Scegliere di inviare sulla blockchain principale un'unica transazione finale permette ad entrambe le parti di garantire il proprio saldo sulla rete.
 
 Il funzionamento logico di base di questo meccanismo è il seguente:
 \begin{enumerate}
     \item \textbf{Apertura:} Due nodi bloccano una somma di denaro comune in una transazione sulla blockchain. Questo è l'unico momento in cui la rete globale viene coinvolta inizialmente. Questa transazione di apertura viene chiamata \textit{Funding Transaction}.
     \item \textbf{Operatività Off-Chain:} Le parti possono scambiarsi un numero illimitato di transazioni aggiornando privatamente la ripartizione dei fondi bloccati. Queste operazioni sono istantanee e non richiedono commissioni di mining, poiché sono semplici scambi di dati firmati crittograficamente tra i due utenti.
-    \item \textbf{Chiusura:} Quando le parti decidono di terminare la collaborazione, l'ultimo stato del bilancio viene inviato alla blockchain per la transazione finale.
+    \item \textbf{Chiusura:} Quando le parti decidono di terminare la collaborazione, l'ultimo stato del bilancio viene inviato alla blockchain per la transazione finale. Non è necessario che entrambe i nodi richiedano di chiudere il canale, basta solo una delle due parti.
 \end{enumerate}
 
 In questo modello, la blockchain non agisce più come un registro contabile di ogni singola transazione, ma assume il ruolo di un giudice imparziale che interviene solo in caso di disputa o alla fine del rapporto economico tra le parti.
@@ -131,9 +131,113 @@ In questo modello, la blockchain non agisce più come un registro contabile di o
 %----------------------------------------------------------------------------------------
 \chapter{Primitive crittografiche per i protocolli off-chain}
 %----------------------------------------------------------------------------------------
-In questo capitolo vengono richiamati i concetti fondamentali necessari per comprendere il funzionamento dei canali di pagamento.
+La sicurezza e il funzionamento dei protocolli di secondo livello non si basano sulla fiducia verso terze parti, ma sull'utilizzo combinato di specifiche primitive crittografiche. Mentre la blockchain di Bitcoin utilizza queste tecnologie per garantire il consenso globale, il Lightning Network le impiega per creare contratti intelligenti, detti \textit{Smart Contracts}, che permettono l'esecuzione sicura delle transazioni off-chain.
+
+In questo capitolo verranno analizzati gli strumenti fondamentali necessari alla costruzione di un canale di pagamento: le \textit{funzioni di hash} per la creazione di vincoli condizionali, le \textit{firme digitali} per la gestione condivisa dei fondi e i \textit{vincoli temporali} per la gestione delle dispute.
 
 \section{Funzioni di hash crittografico e loro proprietà}
+Le funzioni di hash svolgono un ruolo fondamentale nella crittografia moderna e hanno numerose applicazioni nell'ambito della sicurezza informatica. Sono infatti utilizzate per esempio per:
+\begin{itemize}
+    \item Firme digitali
+    \item Verifica dell'integrità dei file
+    \item Sicurezza delle password
+    \item Blockchain
+    \item SSL/TLS protocolli
+\end{itemize}
+Una funzione di hash è una funzione \textbf{non invertibile} che trasforma una sequenza di bit di lunghezza arbitraria in una sequenza di bit di lunghezza predefinita, chiamata \textbf{digest}.
+
+Le funzioni di hash specifiche per gli ambiti crittografici devono avere le seguenti proprietà:
+\begin{itemize}
+    \item \textbf{Determinismo} $\rightarrow$ lo stesso input inserito nella stessa funzione hash deve dare come risultato lo stesso output
+    \item \textbf{Efficienza} $\rightarrow$ il valore hash deve venir calcolato rapidamente, indipendentemente dalla dimensione dell'input
+    \item \textbf{Non invertibilità} $\rightarrow$ dato un digest non deve essere possibile risalire all'input che lo ha generato
+    \item \textbf{Effetto valanga} $\rightarrow$ piccole modifiche nel messaggio di input determinano modifiche significative, apparentemente non correlate, nell'hash di output
+\end{itemize}
+Ognuna di queste caratteristiche è essenziale per rendere la funzione crittograficamente sicura. Sarà possibile osservare come il determinismo e l'effetto valanga rendano impossibile modificare i dati di transazioni inserite dentro i blocchi della blockchain, poiché il blocco cambierebbe totalmente il digest da lui generato. Invece la non invertibilità rende meccanismi come la \textit{proof-of-work} validi e solo risolvibili provando e scartando soluzioni randomicamente.
+
+Tali funzioni devono essere in grado di resistere al problema delle \textbf{collisioni}. Avviene una collisione ogni volta che due input differenti generano lo stesso output. Se un algoritmo genera delle collisioni significa che non è un algoritmo sicuro.
+
+La famiglia di funzioni crittografiche di hash più utilizzata ad oggi è la \textbf{SHA}, \textit{Secure Hash Algorithm}, i vari algoritmi che ne fanno parte si distinguono per differenza di lunghezza del \textit{digest} e resistenza alle collisioni:
+\begin{itemize}
+    \item \textbf{SHA-1} $\rightarrow$ è stato l'algoritmo più usato della famiglia sha, diffuso in numerose applicazioni e protocolli nonostante ormai sia considerato insicuro, dato che la sua sicurezza è stata compromessa dai crittoanalisti. Produce un \textit{digest} di 160 bit, da un input lungo massimo $2^{64}-1$ bit.
+    \item \textbf{SHA-2} $\rightarrow$ Nel 2001 vengono pubblicate dal NIST altre quattro funzioni di hash, ognuna con un \textit{digest} più lungo di quello originale. A far parte di questo sottogruppo sono \textbf{SHA-224}, \textbf{SHA-256}, \textbf{SHA-384} e \textbf{SHA-512}, che, come intuibile, generano \textit{digest} rispettivamente di 224, 256, 384 e 512 bit. Gli algoritmi \textbf{SHA-256} e \textbf{SHA-512} lavorano rispettivamente con \textit{word} di 32 e 64 bit. La loro struttura è sostanzialmente identica anche se utilizzano un differente numero di rotazioni e di costanti addizionali. Gli altri due algoritmi, invece, sono semplicemente delle versioni troncate di questi, con hash calcolati con differenti valori iniziali. La loro sicurezza in campo crittografico non è stata del tutto provata perché non hanno ricevuto molta attenzione dalle comunità dei crittoanalisti.
+    \item \textbf{SHA-3} $\rightarrow$ Nuovo membro della famiglia SHA trovato grazie ad un competizione lanciata dal NIST nel 2007, con l'obiettivo di sviluppare una nuova funzione di hashing per rafforzare le versioni precedenti.
+\end{itemize}
+
+Verrà analizzata più nel dettaglio la variante \textbf{SHA-256} che è attualmente la più utilizzata.
+L'algoritmo elabora il messaggio di input in blocchi da \textbf{512 bit}, applicando su ciascuno di essi una serie di \textbf{64 iterazioni} di funzioni logiche, rotazioni e somme con modulo $2^{32}$. Ogni blocco modifica lo stato interno composto da 8 registri a 32 bit, che alla fine formano l'hash finale.
+
+La prima fase, detta \textbf{pre-processing}, si occupa di rendere la lunghezza del messaggio un multiplo di 512. Per far ciò il messaggio viene convertito in binario e viene aggiunto un bit a 1 in fondo; successivamente vengono aggiunti \textit{k} bit a 0, con \textit{k} che indica il minor numero intero positivo tale che $l + 1 + k\equiv 448 \mod{512}$, con \textit{l} che indica la lunghezza in bit del messaggio iniziale. Infine \textit{l} viene rappresentata con 64 bit e aggiunta alla fine del messaggio.
+
+Successivamente avviene la fase di \textbf{inizializzazione}, in cui si inizializzano i primi 8 registri a 32 bit con i primi 32 bit della parte frazionaria della radice quadrata dei primi 8 numeri primi.
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Registro} & \textbf{Valore esadecimale} \\ \hline
+$H_0$ & 6a09e667 \\ \hline
+$H_1$ & bb67ae85 \\ \hline
+$H_2$ & 3c6ef372 \\ \hline
+$H_3$ & a54ff53a \\ \hline
+$H_4$ & 510e527f \\ \hline
+$H_5$ & 9b05688c \\ \hline
+$H_6$ & 1f83d9ab \\ \hline
+$H_7$ & 5be0cd19 \\ \hline
+\end{tabular}
+\caption{Valori iniziali dei registri di SHA-256 (primi 32 bit della parte frazionaria della radice quadrata dei primi 8 numeri primi).}
+\end{table}
+
+
+Come \textbf{costanti di round} SHA-256 usa i primi 32 bit della parte frazionaria della radice cubica dei primi 64 numeri primi.
+
+Il messaggio preprocessato poi viene suddiviso in blocchi da 512 bit, e ogni blocco viene poi a sua volta diviso in \textbf{16 word} da 32 bit che vengono espansi fino ad arrivare a \textbf{64 word}.
+
+Ogni blocco da 512 bit aggiorna lo stato interno tramite le 64 iterazioni. Dopo l'elaborazione di tutti i blocchi i registri vengono concatenati in ordine per formare 256 bit, ossia 32 byte.
+\[\text{hash} = H_0 \,\|\, H_1 \,\|\, H_2 \,\|\, H_3 \,\|\, H_4 \,\|\, H_5 \,\|\, H_6 \,\|\, H_7\]
+
+Di seguito viene riportato un riassunto dell'algoritmo in pseudocodice:
+\BlankLine
+\begin{algorithm}[H]
+\caption{SHA-256$(msg)$}
+\KwIn{Messaggio $msg$ di lunghezza arbitraria}
+\KwOut{Digest a 256 bit}
+
+\BlankLine
+\textbf{1.} $k[0..63] \leftarrow$ primi 32 bit della parte frazionaria della radice cubica dei primi 64 numeri primi\;
+\textbf{2.} $(h_0, h_1, h_2, h_3, h_4, h_5, h_6, h_7) \leftarrow \text{Inizializza()}$\;
+\textbf{3.} $m \leftarrow \text{PreProcessing}(msg)$\;
+\textbf{4.} $i \leftarrow 0$\;
+\textbf{5.} $l \leftarrow \text{length}(m)$\;
+
+\BlankLine
+\While{$i < l$}{
+    \textbf{6.} $chunk \leftarrow m[i : i + 511]$\;
+    \textbf{7.} $w \leftarrow \text{ChunkExpansion}(chunk)$\;
+    \textbf{8.} $(a, b, c, d, e, f, g, h) \leftarrow \text{ChunkCompression}(w, k, h_0, \dots, h_7)$\;
+    \textbf{9.} $(h_0, ..., h_7) \leftarrow (h_0 + a, ..., h_7 + h) \bmod 2^{32}$\;
+    \textbf{10.} $i \leftarrow i + 512$\;
+}
+\BlankLine
+\textbf{11.} \Return $h_0 \,\|\, h_1 \,\|\, h_2 \,\|\, h_3 \,\|\, h_4 \,\|\, h_5 \,\|\, h_6 \,\|\, h_7$\;
+
+\end{algorithm}
+\BlankLine
+L'algoritmo SHA-256 riveste un ruolo centrale nel protocollo Bitcoin: viene infatti utilizzato per calcolare l'hash di ciascun blocco, per collegare i blocchi della catena tra loro e, soprattutto, nel meccanismo di \textbf{Proof-of-Work}, dove i miner devono trovare un valore di nonce tale che l'hash del blocco risulti inferiore a una soglia prefissata, detta \textit{target}. 
+Quindi è anche grazie a questo algoritmo se il sistema riesce a resistere alle modifiche retroattive e a garantire l'integrità della blockchain.
+
+Nel contesto delle criptovalute, in particolare Bitcoin, ogni transazione e ogni blocco della blockchain vengono identificati da un hash calcolato applicando due volte la funzione di SHA-256, il processo si chiama \textbf{double hashing}. Questa doppia applicazione serve a ridurre la probabilità di collisioni e proteggere da eventuali attacchi.
+
+Nel contesto specifico del Lightning Network, tuttavia, l'uso più rilevante delle funzioni di hash non è legato al mining o alla struttura a blocchi, ma alla creazione di vincoli condizionali per i pagamenti.
+
+La proprietà di \textit{resistenza alla preimmagine} viene sfruttata per generare segreti crittografici fondamentali per il routing sicuro. Il meccanismo, che costituisce la base degli \textbf{Hashed Time-Lock Contracts (HTLC)}, funziona nel seguente modo:
+\begin{enumerate}
+    \item Il destinatario di un pagamento genera un numero casuale $R$ (detto \textit{pre-image} o segreto).
+    \item Viene calcolato l'hash di questo segreto: $H = \text{SHA-256}(R)$, denominato \textit{payment hash}.
+    \item L'hash $H$ viene condiviso pubblicamente con il mittente e con la rete, mentre $R$ rimane segreto fino al momento dell'incasso.
+\end{enumerate}
+
+I fondi vengono vincolati a $H$ tramite uno smart contract: essi possono essere spesi solo da chi è in grado di rivelare la preimmagine $R$ che, passata attraverso la funzione SHA-256, restituisce l'hash $H$ specificato nel contratto. Data l'unidirezionalità della funzione, è computazionalmente impossibile per un attaccante risalire a $R$ conoscendo solo $H$, garantendo così che solo il legittimo destinatario possa sbloccare i fondi \cite{antonopoulos2017mastering}.
+~\cite{materiale_didattico_hash}~\cite{ssl_hash_crittografica}~\cite{wikipedia_sha_algorithms}~\cite{cloudflare_sha256}
 \section{Firme digitali e firme multiple}
 \section{Vincoli temporali nelle transazioni}
 

@@ -180,6 +180,7 @@ La proprietà di \textit{resistenza alla preimmagine} viene sfruttata per genera
 I fondi vengono vincolati a $H$ tramite uno smart contract: essi possono essere spesi solo da chi è in grado di rivelare la preimmagine $R$ che, passata attraverso la funzione SHA-256, restituisce l'hash $H$ specificato nel contratto. Data l'unidirezionalità della funzione, è computazionalmente impossibile per un attaccante risalire a $R$ conoscendo solo $H$, garantendo così che solo il legittimo destinatario possa sbloccare i fondi \cite{antonopoulos2017mastering}.
 
 \section{Firme digitali e firme multiple}
+\subsection{Firme digitali}
 Le firme digitali vengono create per permettere ai sistemi di elaborazione di accertare l'identità di un utente. Il destinatario di un messaggio, o di una somma di denaro, deve poter essere in grado di verificare l'identità del mittente e l'integrità di ciò che ha ricevuto, dunque il metodo utilizzato deve rendere difficile ad un intruso di spacciarsi per qualcun altro o di modificare i messaggi inviati.
 
 La firma digitale entra in gioco proprio nei sistemi \textit{trustless}, quando il mittente e il destinatario non si fidano l'uno dell'altro. Il meccanismo, per essere valido, deve rispettare i seguenti tre requisiti:
@@ -187,27 +188,52 @@ La firma digitale entra in gioco proprio nei sistemi \textit{trustless}, quando 
 \item \textbf{Non ripudio}$\rightarrow$ non deve essere permesso ad un mittente di negare di aver mandato un messaggio da lui firmato
 \item \textbf{Autenticazione e integrità}$\rightarrow$ il destinatario deve poter autenticare il messaggio, ossia accertare l'identità del mittente e l'integrità del messaggio ricevuto
 \item \textbf{Irrefutabilità della ricezione}$\rightarrow$ il destinatario non deve poter sostenere di aver ricevuto un messaggio diverso da quello inviatogli dal mittente
-\end{enumerate}
+\end{enumerate} \cite{stallings2017cryptography}
 
-Per realizzare una firma digitale si possono utilizzare sia protocolli crittografici \textbf{simmetrici} che \textbf{asimmetrici}, i primi però danno luogo a realizzazioni più complicate e computazionalmente costose,  motivo per cui si preferisce usare i protocolli crittografici asimmetrici. Come detto in precendenza le firme digitali si occupano di garantire autenticità, non di nascondere il contenuto del messaggio che si sta firmando.
+Il meccanismo crittografico adottato da Bitcoin si chiama \textbf{Elliptic Curve Digital Signature Algorithm}, ossia \textbf{ECDSA}. Con esso vengono firmate digitalmente le transazioni ed ogni nodo può dimostrare il possesso della propria chiave privata, senza però andare a rivelarla. Le chiavi private in Bitcoin sono molto importanti, perchè è con esse che si dimostra il possesso di una certa quantità di monete, se la chiave viene persa anche i fondi a lei associati saranno perduti, mentre se viene rubata consente di spendere il denaro dell'utente.
 
-Il meccanismo crittografico adottato da Bitcoin si chiama \textbf{Elliptic Curve Digital Signature Algorithm}, ossia \textbf{ECDSA}. Con esso vengono firmate digitalmente le transazioni ed ogni nodo può dimostrare il possesso della propria chiave privata, senza però andare a rivelarla. Le chiavi private in Bitcoin sono molto importanti, perchè è con esse che si dimostra la possessione di una certa quantità di monete, se la chiave viene persa anche i bitcoin a lei associati saranno perduti, mentre se viene rubata consente di spendere i fondi associati all'utente corrispondente.
+ECDSA si basa sulla crittografia a \textbf{curve ellittiche}, una variante della crittografia asimmetrica che riesce ad ottenere lo stesso livello di sicurezza di algoritmi come RSA utilizzando chiavi molto più piccole, risultando quindi più efficiente. \cite{antonopoulos2017mastering}
 
-ECDSA si basa sulla crittografia a \textbf{curve ellittiche}, una variante della crittografia asimmetrica che riesce ad ottenere lo stesso livello di sicurezza di algoritmi come RSA utilizzando chiavi molto più piccole, risultando quindi più efficiente.
-
-La \textbf{chiave privata} di ogni utente viene scelta randomicamente in un intervallo definito, e la \textbf{chiave pubblica} viene derivata tramite un'operazione matematica detta \textbf{moltiplicazione scalare} su una curva ellittica. La curva adottata da Bitcoin è la \textbf{secp256k1}, che opera su un campo finito di 256 bit, scelta per la sua semplicità ed efficienza.
+La \textbf{chiave privata} di ogni utente viene scelta randomicamente in un intervallo definito, e la \textbf{chiave pubblica} viene derivata tramite un'operazione matematica detta \textbf{moltiplicazione scalare} su una curva ellittica. La curva adottata da Bitcoin è la \textbf{secp256k1}, che opera su un campo finito di 256 bit, scelta per la sua semplicità ed efficienza. \cite{sec2_2010}
 
 La sicurezza del sistema si basa sulla difficoltà computazionale di risalire alla chiave privata di determinato utente conoscendo solo quella pubblica, ossia risolvere il \textbf{problema del logaritmo discreto su curve ellittiche}.
 
 Durante una firma, l'algoritmo genera una coppia di valori partendo dal messaggio e dalla chiave privata del nodo in questione, questi due numeri costituiscono quindi la firma digitale. Chiunque può verificarne la veridicità utilizzando la chiave pubblica del mittente.
 
-ECDSA garantisce l'autenticità e la non ripudiabilità delle transazioni, rendendo possibile un sistema di scambio decentralizzato.~\cite{bitcoinwiki_ecdsa}~\cite{materiale_didattico_firme}~\cite{learnmeabitcoin_ecdsa}
-\begin{center}
-    \includegraphics[width=\textwidth, height=0.45\textheight, keepaspectratio]{figures/ecdsa.png}
-    \captionof{figure}{\textit{Schema visivo di ECDSA.}}
+ECDSA garantisce l'autenticità e la non ripudiabilità delle transazioni, rendendo possibile un sistema di scambio decentralizzato.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth, keepaspectratio]{figures/ecdsa.png} 
+    \caption[Schema ECDSA]{Schema logico della firma digitale ECDSA. La chiave privata firma l'hash del messaggio; la chiave pubblica permette la verifica senza rivelare il segreto. (Fonte: rielaborazione da Scrypt Platform)}
     \label{fig:ECDSA}
-\end{center}
+\end{figure}
+
+\subsection{Firme multiple}
+Per implementare un sistema complesso come il Lightning Network richiede meccanismi avanzati e di conseguenza le firme singole non bastano più. Per gestire la proprietà condivisa dei canali sono richieste le \textbf{firme multiple}, o \textbf{multisig}, che permettono di vincolare i fondi ad un gruppo di persone.
+
+In questa tipologia di schemi viene impostata una condizione per cui nello script di output vengono registrate $k$ chiavi pubbliche ed almeno $t$ di queste devono fornire una firma valida per spendere i fondi. Schemi come questo vengono definiti come $t$-of-$k$. Per esempio in una firma multipla 2-of-3 ci sono tre potenziali chiavi pubbliche, ed almeno due di queste devono essere usate per creare una firma valida per spendere i fondi. \cite{antonopoulos2017mastering}
+
+Nel contesto del Lightning Network, viene utilizzato uno schema 2-of-2. Quando due utenti aprono un canale di pagamento, creano una transazione di finanziamento, la \textit{Funding Transaction}, verso un indirizzo multisig controllato congiuntamente. Dal momento in cui il canale è stato creato, la regola imposta dalla blockchain è semplice e stretta: per muovere quei fondi è necessario il consenso di entrambe le parti, questo si traduce nella necessità che entrambe le parti firmino le modifiche allo stato dei fondi.
+
+Questa architettura agisce come una garanzia di sicurezza preventiva:
+\begin{itemize}
+    \item Nessuna delle parti può sottrarre i fondi all'altra, poiché mancherebbe la seconda firma necessaria.
+    \item In caso di disaccordo, i fondi rimangono bloccati.
+\end{itemize}
+In realtà, per quanto riguarda questo ultimo punto, nel protocollo sono previsti meccanismi di uscita che permettono di risolvere la disputa, come i \textit{timelock}, che verranno descritti successivamente. \cite{poon2016lightning}
+
+In sintesi, il Multisig rende i fondi vincolati in un canale condivisi, costringendo le parti a cooperare per aggiornare lo stato del canale.
+
 \section{Vincoli temporali nelle transazioni}
+In contesti diversi da questo è auspicabile che non appena una transazione sia avvenuta, il denaro derivante da essa sia immediatamente spendibile, invece in sistemi complessi come il Lightning Network è necessario che i fondi derivati da una transazione non siano spendibili immediatamente, questo per evitare truffe e frodi.
+
+Verrà chiarito in seguito come il non permettere di spendere subito i fondi derivanti da una transazioni sia una misura di sicurezza che permette alla controparte del canale di realizzare di essere stato fregato e di agire di conseguenza.
+
+Diventa quindi necessario gestire il tempo all'interno delle transazioni, e qui entrano in gioco i \textbf{timelock}. Ne esistono due tipi:
+\begin{itemize}
+    \item \textbf{Timelock assoluti:} rendono l'output di una transazione spendibile sono dopo un determinato punto nel futuro. Questi vengono utilizzati per i rimborsi: nel caso in cui due nodi abbiamo aperto un canali e quindi stanziato dei fondi, se uno dei due dovesse smettere di rispondere, l'altro dopo un determinato periodo può riavere indietro i fondi che aveva bloccato. \cite{bip65}
+    \item \textbf{Timelock relativi:} rendono l'output di una transazione spendibile dopo che sono stati validati un certo numero di blocchi. Questi possono anche essere visti come l'età di una transazione. Vengono utilizzati nel caso di dispute: tenendo bloccati i fondi per un certo numero di blocchi un'eventuale vittima può accorgersi di essere stata truffata e agire.\cite{bip112}
+\end{itemize}
 
 %----------------------------------------------------------------------------------------
 \chapter{Bitcoin come livello base di sicurezza}

@@ -68,3 +68,28 @@
   year={1996},
   publisher={John Wiley \& Sons}
 }
+
+@techreport{sec2_2010,
+  title={SEC 2: Recommended Elliptic Curve Domain Parameters},
+  author={{Certicom Research}},
+  year={2010},
+  institution={Standards for Efficient Cryptography Group (SECG)},
+  note={Version 2.0},
+  url={https://www.secg.org/sec2-v2.pdf}
+}
+
+@misc{bip65,
+  title={BIP 65: OP\_CHECKLOCKTIMEVERIFY},
+  author={Todd, Peter},
+  year={2014},
+  howpublished={\url{https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki}},
+  note={Standard per timelock assoluti}
+}
+
+@misc{bip112,
+  title={BIP 112: CHECKSEQUENCEVERIFY},
+  author={Friedenbach, Mark and BtcDrak and Lombrozo, Eric},
+  year={2015},
+  howpublished={\url{https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki}},
+  note={Standard per timelock relativi}
+}

@@ -93,3 +93,24 @@
   howpublished={\url{https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki}},
   note={Standard per timelock relativi}
 }
+
+@phdthesis{conoscenti2019payment,
+  author      = {Conoscenti, Marco},
+  title       = {Capabilities and Limitations of Payment Channel Networks for Blockchain Scalability},
+  school      = {Politecnico di Torino},
+  year        = {2019},
+  address     = {Torino, Italia},
+  keywords    = {Lightning Network, payment channels, blockchain scalability, HTLC},
+  url         = {https://hdl.handle.net/20.500.14242/125486},
+  note        = {Tesi di dottorato, accesso aperto}
+}
+
+@inproceedings{chaum1983blind,
+  author    = {Chaum, David},
+  title     = {Blind Signatures for Untraceable Payments},
+  booktitle = {Advances in Cryptology},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages     = {199--203},
+  year      = {1983}
+}

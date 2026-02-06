@@ -6,6 +6,7 @@
 \usepackage{notes}
 \usepackage{shortcuts}
 \usepackage{acronym}
+\usepackage{caption}
 
 \school{\unibo}
 \programme{Corso di Laurea in Ingegneria e Scienze Informatiche}
@@ -225,22 +226,76 @@ In realtà, per quanto riguarda questo ultimo punto, nel protocollo sono previst
 In sintesi, il Multisig rende i fondi vincolati in un canale condivisi, costringendo le parti a cooperare per aggiornare lo stato del canale.
 
 \section{Vincoli temporali nelle transazioni}
-In contesti diversi da questo è auspicabile che non appena una transazione sia avvenuta, il denaro derivante da essa sia immediatamente spendibile, invece in sistemi complessi come il Lightning Network è necessario che i fondi derivati da una transazione non siano spendibili immediatamente, questo per evitare truffe e frodi.
+Nei sistemi di pagamento tradizionali l'obiettivo è rendere il denaro derivante da una transazione immediatamente spendibile; nei sistemi complessi come il Lightning Network, invece, è necessario che i fondi derivati da una transazione non siano spendibili immediatamente, questo per evitare truffe e frodi.
 
-Verrà chiarito in seguito come il non permettere di spendere subito i fondi derivanti da una transazioni sia una misura di sicurezza che permette alla controparte del canale di realizzare di essere stato fregato e di agire di conseguenza.
+Verrà chiarito in seguito come il non permettere di spendere subito i fondi derivanti da una transazioni sia una misura di sicurezza che permette alla controparte del canale di realizzare di aver subito una truffa e di agire di conseguenza.
 
-Diventa quindi necessario gestire il tempo all'interno delle transazioni, e qui entrano in gioco i \textbf{timelock}. Ne esistono due tipi:
+Diventa quindi necessario gestire il tempo all'interno delle transazioni. Quest'ultimo nella blockchain di Bitcoin non è misurato prevalentemente in secondi, ma in \textbf{altezza di blocco}, \textit{Block Height}, sebbene sia possibile utilizzare anche il timestamp Unix. Poiché un blocco viene minato in media ogni 10 minuti, definire un intervallo di 144 blocchi equivale a circa 24 ore.
+
+Entrano quindi in gioco i \textbf{timelock}. Ne esistono due tipi:
 \begin{itemize}
-    \item \textbf{Timelock assoluti:} rendono l'output di una transazione spendibile sono dopo un determinato punto nel futuro. Questi vengono utilizzati per i rimborsi: nel caso in cui due nodi abbiamo aperto un canali e quindi stanziato dei fondi, se uno dei due dovesse smettere di rispondere, l'altro dopo un determinato periodo può riavere indietro i fondi che aveva bloccato. \cite{bip65}
-    \item \textbf{Timelock relativi:} rendono l'output di una transazione spendibile dopo che sono stati validati un certo numero di blocchi. Questi possono anche essere visti come l'età di una transazione. Vengono utilizzati nel caso di dispute: tenendo bloccati i fondi per un certo numero di blocchi un'eventuale vittima può accorgersi di essere stata truffata e agire.\cite{bip112}
+    \item \textbf{Timelock assoluti:} rendono l'output di una transazione spendibile solo dopo un determinato punto nel futuro, ad esempio dopo il blocco 850.000.
+    A livello di script, questi sono implementati tramite l'opcode \textbf{\texttt{OP\_CHECKLOCKTIMEVERIFY}} (CLTV), introdotto con il BIP 65 \cite{bip65}.
+    Questi vengono utilizzati per i \textbf{rimborsi}. Come detto precedentemente, quando due nodi aprono un canale bloccano dei fondi con la \textit{Funding Transaction}, questa rende tali fondi comuni ed impone la necessità della firma di entrambe le parti per fare un qualsiasi movimento. Se un nodo, una volta creato il canale, smette di rispondere, o va offline perennemente, l'altro, dopo un determinato periodo, può recuperare i fondi che aveva bloccato grazie a una transazione che diviene valida solo allo scadere del timelock. \cite{antonopoulos2017mastering}
+    \item \textbf{Timelock relativi:} introdotti con il BIP 112 \cite{bip112} tramite l'opcode \textbf{\texttt{OP\_CHECKSEQUENCEVERIFY}} (CSV), essi non guardano una data fissa nel calendario, ma l'età dell'output che si sta spendendo. Questo tipo di timelock impone la seguente condizione: una transazione $X$ che spende un output $Y$ è valida se e solo se sono passati $n$ blocchi dalla conferma di $Y$ sulla blockchain.
+    Vengono utilizzati nel caso di \textbf{dispute}, e sono l'elemento centrale del meccanismo di sicurezza del Lightning Network. Tenendo bloccati i fondi per un certo numero di blocchi, un'eventuale vittima può accorgersi di essere stata truffata e creare una finestra di contestazione. La vittima ha tempo a sufficienza per accorgersi del tentativo di frode e, utilizzando una chiave di revoca, prelevare l'intera somma prima che il timelock scada e il truffatore possa incassare. \cite{antonopoulos2017mastering}
 \end{itemize}
 
 %----------------------------------------------------------------------------------------
 \chapter{Bitcoin come livello base di sicurezza}
 %----------------------------------------------------------------------------------------
-Nel Lightning Network, Bitcoin assume il ruolo di livello di sicurezza e di arbitro finale in caso di problemi.
+Nel capitolo precedente sono state analizzate le primitive crittografiche necessarie per la costruzione di contratti condizionali e canali di pagamento. Tuttavia, per ottenere un sistema funzionante, sicuro e soprattutto \textit{trustless}, gli elementi appena trattati, da soli, non bastano. Sorge quindi la necessità di un'infrastruttura sottostante, in grado di interpretarli ed eseguirli in modo inappellabile.
+
+Il protocollo originale di Bitcoin, a questo punto, non è più utilizzato solo come valuta digitale, ma assume un ruolo cruciale, diventando un arbitro imparziale per le \textit{dispute}.
+Come teorizzato nel whitepaper di Satoshi Nakamoto \cite{nakamoto2008bitcoin}, la blockchain risolve il problema della doppia spesa attraverso una catena di prove crittografiche basate sul lavoro computazionale. Per le soluzioni di secondo livello come il Lightning Network, questa proprietà di immutabilità è fondamentale: la blockchain principale diventa l'ente a cui le parti si rivolgono solo in caso di controversia o per finalizzare gli scambi avvenuti privatamente.
+
+Come detto nei capitoli precedenti, è importante sottolineare che le transazioni eseguite nel Lightning Network non sono alternative a Bitcoin, ma sono vere e proprie transazioni Bitcoin valide, la differenza è che queste vengono trattenute dai nodi e non sono trasmesse immediatamente alla rete globale. La sicurezza di questi scambi \textit{off-chain} deriva interamente dalla certezza che, in qualsiasi momento, lo stato corrente del canale possa essere pubblicato e confermato sulla blockchain principale.
+
+Questo capitolo analizzerà le componenti strutturali di Bitcoin che rendono possibile tale architettura. In primo luogo, verrà esaminata la struttura delle transazioni, successivamente, si discuterà il ruolo della Proof-of-Work non solo come meccanismo di consenso, ma come orologio universale per la gestione dei vincoli temporali. Infine, verrà trattata l'evoluzione del protocollo con l'introduzione di Segregated Witness (SegWit), un aggiornamento critico che, risolvendo la vulnerabilità della \textit{transaction malleability}, ha reso possibile l'implementazione sicura ed efficiente dei canali di pagamento moderni.
 
 \section{Struttura delle transazioni}
+Le \textbf{transazioni} permettono ai nodi di scambiarsi i Bitcoin \cite{conoscenti2019payment}, la possibilità di attuare tali operazioni è un aspetto fondamentale per una moneta elettronica. Senza transazioni i vari proprietari di monete non potrebbero scambiarsele tra loro e si andrebbe dunque a perdere il concetto di moneta stessa.
+
+Ogni utente possessore di bitcoin può trasferire una certa quantità di valuta ad un altro utente andando ad apporre la propria firma digitale sull'hash della transazione precedente e la chiave pubblica del nuovo proprietario.
+
+Sorge però un problema: un qualsiasi utente non può verificare che un possessore di bitcoin che ha appena effettuato una transazione non abbia già speso quelle monete altre volte, ossia non abbia effettuato un \textbf{double-spending}. Di fatto il denaro digitale può essere duplicato senza alcuna fatica, proprio come qualsiasi altro oggetto digitale.\cite{conoscenti2019payment}
+
+Bisogna quindi trovare un modo per dimostrare ai beneficiari di una transazione che le monete che stanno ricevendo non sono già state spese. La moneta digitale introdotta da David Chaum nel 1983, chiamata Ecash \cite{chaum1983blind}, è la prima a risolvere il problema della doppia spesa, ma in un sistema centralizzato, di conseguenza Bitcoin è il primo metodo di pagamento digitale in grado di risolvere questo problema in maniera totalmente decentralizzata.
+
+Per fare ciò tutti i nodi della rete devono essere a conoscenza di tutte le transazioni che sono state eseguite fino a quel momento e devono essere tutti d'accordo sull'ordine cronologico in cui sono avvenute, dunque tutte le transazioni devono essere pubbliche.
+
+Per accordare ogni nodo sull'ordine cronologico si utilizza un \textbf{timestamp server} che prende in input un insieme di dati e ne calcola l'hash per poi pubblicarlo. Rendendo l'hash pubblico chiunque può verificare che quei dati dovevano già esistere al momento della pubblicazione. Ogni nuovo timestamp include anche l'hash del precedente in modo tale da creare una blockchain.
+
+In sintesi il timestamp server è usato per creare una prova temporale immutabile dell'esistenza dei dati.~\cite{nakamoto2008bitcoin}
+\begin{center}
+    \includegraphics[width=1.4\textwidth, height=0.4\textheight, keepaspectratio]{figures/transazioni.png}
+    \captionof{figure}{\textit{Struttura delle transazioni.}}
+    \label{fig:Transazioni}
+\end{center}
+
+\section{Struttura dei blocchi}
+Ogni blocco della blockchain di Bitcoin è costituito da due sezioni:
+\begin{itemize}
+    \item \textbf{Block header} $\rightarrow$ l'intestazione del blocco.
+    \item \textbf{Block body} $\rightarrow$ l'elenco delle transazioni appartenenti al blocco.
+\end{itemize}
+\begin{center}
+    \includegraphics[width=1.3\textwidth, height=0.5\textheight, keepaspectratio]{figures/blockBitcoin.png}
+    \captionof{figure}{\textit{Struttura dei blocchi.}}
+    \label{fig:Blocchi}
+\end{center}
+Le informazioni contenute nell'intestazione sono necessarie a collegare i vari blocchi tra loro e a verificarne la validità. Nella figura \ref{fig:Blocchi} possiamo vedere quali sono gli elementi che compongono l'header di un tipico blocco della blockchain di Bitcoin:
+\begin{itemize}
+    \item \textbf{Version} $\rightarrow$ 4 bytes, indica la versione corrente del blocco e dunque le regole di validazione che esso sta seguendo.
+    \item \textbf{PrevHashBlock}$\rightarrow$ 32 bytes, rappresenta il doppio hash del header del blocco precedente, necessario per rendere tale struttura una catena. Garantisce che nessun blocco precedente possa essere modificato senza modificare anche l'intestazione di questo. Ovviamente l'unico blocco che non ha un predecessore è il primo, che viene chiamato \textbf{genesis block}.
+    \item \textbf{MerkleRootHash} $\rightarrow$ 32 bytes, è il doppio hash della root dell'albero di Merkle composto da tutte le transazioni appartenenti al blocco in questione. Modificare una transazione significa anche modificare questo elemento del blocco.
+    \item \textbf{Timestamp} $\rightarrow$ 4 bytes, data ed ora della creazione del blocco. Deve essere maggiore del timestamp medio degli 11 blocchi precedenti.
+    \item \textbf{Bits/Target} $\rightarrow$ 4 bytes, codifica compatta della difficoltà richiesta per trovare un hash valido per risolvere il blocco.
+    \item \textbf{Nonce} $\rightarrow$ 4 bytes, numero arbitrario trovato dai miners che rende l'hash del blocco valido, ossia inferiore al target. Se tutti i valori a 32 bit vengono tentati si può aggiornate il timestamp o la Merkle root.
+\end{itemize}
+
+Per quanto riguarda invece il body del blocco si nota che il primo elemento all'interno dell'elenco delle transazioni e la cosiddetta \textbf{coinbase transaction}, ossia i nuovi bitcoin che sono stati generati e dati come ricompensa al miner che ha risolta il blocco in questione. Questo meccanismo, noto come \textbf{block reward}, rappresenta l'unico modo con cui vengono emessi nuovi bitcoin nel sistema. ~\cite{nakamoto2008bitcoin}~\cite{bitcoin_dev_blockchain}
+
 \section{Proof-of-Work: meccanismo di consenso e arbitraggio}
 \section{Transaction malleability e introduzione di SegWit}
 

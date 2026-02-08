@@ -160,7 +160,7 @@ Ognuna di queste caratteristiche è essenziale per rendere la funzione crittogra
 La famiglia di funzioni crittografiche di hash più utilizzata ad oggi è la \textbf{SHA}, \textit{Secure Hash Algorithm}, i vari algoritmi che ne fanno parte si distinguono per differenza di lunghezza del \textit{digest} e resistenza alle collisioni:
 \begin{itemize}
     \item \textbf{SHA-1} $\rightarrow$ è stato l'algoritmo più usato della famiglia sha, diffuso in numerose applicazioni e protocolli nonostante ormai sia considerato insicuro, dato che la sua sicurezza è stata compromessa dai crittoanalisti. Produce un \textit{digest} di 160 bit, da un input lungo massimo $2^{64}-1$ bit.
-    \item \textbf{SHA-2} $\rightarrow$ Nel 2001 vengono pubblicate dal NIST altre quattro funzioni di hash, ognuna con un \textit{digest} più lungo di quello originale. A far parte di questo sottogruppo sono \textbf{SHA-224}, \textbf{SHA-256}, \textbf{SHA-384} e \textbf{SHA-512}, che generano \textit{digest} rispettivamente di 224, 256, 384 e 512 bit. Gli algoritmi \textbf{SHA-256} e \textbf{SHA-512} lavorano rispettivamente con \textit{word} di 32 e 64 bit. La loro struttura è sostanzialmente identica anche se utilizzano un differente numero di rotazioni e di costanti addizionali. Gli altri due algoritmi, invece, sono semplicemente delle versioni troncate di questi, con hash calcolati con differenti valori iniziali. La loro sicurezza in campo crittografico non è stata del tutto provata perché non hanno ricevuto molta attenzione dalle comunità dei crittoanalisti.
+    \item \textbf{SHA-2} $\rightarrow$ Nel 2001 vengono pubblicate dal NIST altre quattro funzioni di hash, ognuna con un \textit{digest} più lungo di quello originale. A far parte di questo sottogruppo sono \textbf{SHA-224}, \textbf{SHA-256}, \textbf{SHA-384} e \textbf{SHA-512}, che generano \textit{digest} rispettivamente di 224, 256, 384 e 512 bit. Gli algoritmi \textbf{SHA-256} e \textbf{SHA-512} lavorano rispettivamente con \textit{word} di 32 e 64 bit. La loro struttura è sostanzialmente identica anche se utilizzano un differente numero di rotazioni e di costanti addizionali. Gli altri due algoritmi, invece, sono semplicemente delle versioni troncate di questi, con hash calcolati con differenti valori iniziali. La sicurezza della famiglia SHA-2 è oggi considerata solida; tuttavia, la sua struttura è stata meno analizzata rispetto a SHA-1 prima della sua compromissione, motivo per cui il NIST ha promosso lo sviluppo di SHA-3.
     \item \textbf{SHA-3} $\rightarrow$ Nuovo membro della famiglia SHA trovato grazie ad un competizione lanciata dal NIST nel 2007, con l'obiettivo di sviluppare una nuova funzione di hashing per rafforzare le versioni precedenti.
 \end{itemize} \cite{stallings2017cryptography}
 
@@ -260,18 +260,62 @@ Ogni utente possessore di bitcoin può trasferire una certa quantità di valuta 
 
 Sorge però un problema: un qualsiasi utente non può verificare che un possessore di bitcoin che ha appena effettuato una transazione non abbia già speso quelle monete altre volte, ossia non abbia effettuato un \textbf{double-spending}. Di fatto il denaro digitale può essere duplicato senza alcuna fatica, proprio come qualsiasi altro oggetto digitale.\cite{conoscenti2019payment}
 
-Bisogna quindi trovare un modo per dimostrare ai beneficiari di una transazione che le monete che stanno ricevendo non sono già state spese. La moneta digitale introdotta da David Chaum nel 1983, chiamata Ecash \cite{chaum1983blind}, è la prima a risolvere il problema della doppia spesa, ma in un sistema centralizzato, di conseguenza Bitcoin è il primo metodo di pagamento digitale in grado di risolvere questo problema in maniera totalmente decentralizzata.
+Bisogna quindi trovare un modo per dimostrare ai beneficiari di una transazione che le monete che stanno ricevendo non sono già state spese. Il sistema di moneta digitale introdotto da David Chaum nel 1983, noto come eCash \cite{chaum1983blind}, è il primo a risolvere il problema della doppia spesa, ma in un ambiente centralizzato, di conseguenza Bitcoin è il primo metodo di pagamento digitale in grado di risolvere questo problema in maniera totalmente decentralizzata.
 
 Per fare ciò tutti i nodi della rete devono essere a conoscenza di tutte le transazioni che sono state eseguite fino a quel momento e devono essere tutti d'accordo sull'ordine cronologico in cui sono avvenute, dunque tutte le transazioni devono essere pubbliche.
 
 Per accordare ogni nodo sull'ordine cronologico si utilizza un \textbf{timestamp server} che prende in input un insieme di dati e ne calcola l'hash per poi pubblicarlo. Rendendo l'hash pubblico chiunque può verificare che quei dati dovevano già esistere al momento della pubblicazione. Ogni nuovo timestamp include anche l'hash del precedente in modo tale da creare una blockchain.
 
 In sintesi il timestamp server è usato per creare una prova temporale immutabile dell'esistenza dei dati.~\cite{nakamoto2008bitcoin}
-\begin{center}
-    \includegraphics[width=1.4\textwidth, height=0.4\textheight, keepaspectratio]{figures/transazioni.png}
-    \captionof{figure}{\textit{Struttura delle transazioni.}}
-    \label{fig:Transazioni}
-\end{center}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/transazioni.png}
+    \caption{Struttura di una transazione Bitcoin composta da input e output. Ogni input fa riferimento a un output non speso di una transazione precedente. Fonte: Nakamoto\cite{nakamoto2008bitcoin}.}
+    \label{fig:tx_structure}
+\end{figure}
+
+
+\subsection{I satoshi}
+I \textbf{satoshi} sono l'unità più piccola utilizzabile nel protocollo originale di Bitcoin \cite{antonopoulos2017mastering}. La relazione che intercorre tra bitcoin e satoshi è la seguente:
+\begin{equation}
+1 \text{ sat} = 10^{-8} \text{ BTC} = 0,00000001 \text{ BTC}
+\end{equation}
+L'evoluzione verso soluzioni di secondo livello, come il Lighting Network, ha reso necessaria una granularità ancora maggiore, introducento così i \textbf{millisatoshi}, o \textbf{msat}. questa suddivisione è fondamentale per permettere il calcolo di commissioni di routing estremamente basse \cite{bolt1_protocol}. I \textit{msat} seguono la relazione sottostante:
+\begin{equation}
+1 \text{ msat} = 10^{-3} \text{ sat} = 10^{-11} \text{ BTC}
+\end{equation}
+
+\subsection{Il modello UTXO}
+A differenza dei sistemi bancari tradizionali o di altre tipologie di monete virtuali, Bitcoin non utilizza un modello basato sui conti o sul portafoglio. Il software dà l'impressione che le monete vengano spostate da un portafoglio ad un altro, quando in realtà queste si muovono di transazione in transazione. Ognuna di esse spende i \textbf{satoshi} ricevuti, che sono gli output di una o più transazioni passate. L'output si ogni transazioni può essere suddiviso in più parti, per permettere di spedire i fondi a nodi differenti, ma ognuna di queste parti è e deve essere spendibile una sola volta \cite{antonopoulos2017mastering}.
+
+Nello specifico, ogni output è univocamente identificato tramite il \textbf{Transaction Identifier} (TXID), ovvero l'hash della transazione firmata da cui ha origine. Poiché ogni singolo output può essere speso una sola volta, l'insieme di tutti gli output registrati sulla blockchain può essere categorizzato in due insiemi disgiunti: gli output già spesi e gli output non ancora spesi, definiti \textbf{Unspent Transaction Outputs (UTXO)}. Una transazione risulta valida se e solo se essa utilizza esclusivamente UTXO esistenti come propri input.
+
+Eccezion fatta per le transazioni di \textit{coinbase}, ovvero le transazioni create dei miner per introdurre nuova moneta del sistema, il protocollo impone un rigoroso bilancio:
+se il valore totale degli output di una transazione eccede quello dei suoi input, la transazione viene considerata invalida e rigettata dalla rete. Al contrario, qualora il valore degli input sia superiore a quello degli output, la differenza viene interpretata come commissione di transazione, detta \textit{transaction fee}, e può essere riscossa dal miner che include la transazione all'interno di un blocco.
+
+Questo modello presenta proprietà fondamentali per i protocolli di secondo livello. In particolare:
+\begin{itemize}
+    \item Ogni stato di un canale di pagamento può essere rappresentato come una possibile spesa futura degli UTXO bloccati nella transazione di funding.
+    \item La spesa concorrente di uno stesso UTXO è impossibile per costruzione, eliminando alla radice il problema del double-spending.
+    \item Gli UTXO permettono di vincolare fondi tramite script arbitrari, consentendo la realizzazione di contratti condizionali.
+\end{itemize}
+
+Come osservato da Poon e Dryja \cite{poon2016lightning}, la possibilità di bloccare e successivamente ridistribuire UTXO condivisi è il meccanismo alla base dei canali di pagamento.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figures/propTransaction.png}
+    \caption{Propagazione e validazione di una transazione nella rete Bitcoin. Ogni nodo verifica la correttezza della transazione prima di propagarla ulteriormente. Fonte: Bitcoin Developer Documentation \cite{bitcoin_dev_blockchain}.}
+    \label{fig:tx_propagation}
+\end{figure}
+
+\subsection{Transazioni e script di spesa}
+In Bitcoin è importante distinguere tra la struttura di una transazione e le condizioni che ne regolano la spendibilità. Una transazione definisce quali UTXO vengono consumati e quali nuovi output vengono creati, ma non contiene logica esecutiva complessa. Le regole che determinano chi e quando può spendere un output sono invece espresse tramite \textbf{Bitcoin Script}, un linguaggio di scripting basato su uno stack, abbastanza limitato. \cite{antonopoulos2017mastering}.
+
+Questa scelta progettuale riduce la superficie di attacco del protocollo e garantisce che il comportamento delle transazioni sia deterministico e facilmente verificabile dai nodi della rete. Ogni output contiene uno script di blocco, lo \textit{scriptPubKey}, mentre per spendere tale output è necessario fornire uno script di sblocco, \textit{scriptSig}, che soddisfi le condizioni imposte.
+
+Nel Lightning Network, Bitcoin Script viene utilizzato per costruire contratti condizionali che combinano firme multiple, vincoli temporali e segreti crittografici. Sebbene il linguaggio non permetta smart contract complessi, la sua semplicità consente di implementare canali di pagamento sicuri senza compromettere la decentralizzazione del layer base \cite{poon2016lightning}.
+
 
 \section{Struttura dei blocchi}
 Ogni blocco della blockchain di Bitcoin è costituito da due sezioni:
@@ -279,25 +323,33 @@ Ogni blocco della blockchain di Bitcoin è costituito da due sezioni:
     \item \textbf{Block header} $\rightarrow$ l'intestazione del blocco.
     \item \textbf{Block body} $\rightarrow$ l'elenco delle transazioni appartenenti al blocco.
 \end{itemize}
-\begin{center}
-    \includegraphics[width=1.3\textwidth, height=0.5\textheight, keepaspectratio]{figures/blockBitcoin.png}
-    \captionof{figure}{\textit{Struttura dei blocchi.}}
-    \label{fig:Blocchi}
-\end{center}
-Le informazioni contenute nell'intestazione sono necessarie a collegare i vari blocchi tra loro e a verificarne la validità. Nella figura \ref{fig:Blocchi} possiamo vedere quali sono gli elementi che compongono l'header di un tipico blocco della blockchain di Bitcoin:
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/blockBitcoin.png}
+    \caption{Struttura di un blocco Bitcoin. Le transazioni sono organizzate in un Merkle tree, il cui hash radice è incluso nell’header del blocco. Fonte: Provino, rielaborazione da \cite{provino_merkle}.}
+    \label{fig:block_structure}
+\end{figure}
+
+Le informazioni contenute nell'intestazione sono necessarie a collegare i vari blocchi tra loro e a verificarne la validità. Nella figura \ref{fig:block_structure} possiamo vedere quali sono gli elementi che compongono l'header di un tipico blocco della blockchain di Bitcoin:
 \begin{itemize}
     \item \textbf{Version} $\rightarrow$ 4 bytes, indica la versione corrente del blocco e dunque le regole di validazione che esso sta seguendo.
     \item \textbf{PrevHashBlock}$\rightarrow$ 32 bytes, rappresenta il doppio hash del header del blocco precedente, necessario per rendere tale struttura una catena. Garantisce che nessun blocco precedente possa essere modificato senza modificare anche l'intestazione di questo. Ovviamente l'unico blocco che non ha un predecessore è il primo, che viene chiamato \textbf{genesis block}.
     \item \textbf{MerkleRootHash} $\rightarrow$ 32 bytes, è il doppio hash della root dell'albero di Merkle composto da tutte le transazioni appartenenti al blocco in questione. Modificare una transazione significa anche modificare questo elemento del blocco.
-    \item \textbf{Timestamp} $\rightarrow$ 4 bytes, data ed ora della creazione del blocco. Deve essere maggiore del timestamp medio degli 11 blocchi precedenti.
+    \item \textbf{Timestamp} $\rightarrow$ 4 bytes, timestamp approssimato della creazione del blocco. Deve essere maggiore del timestamp medio degli 11 blocchi precedenti.
     \item \textbf{Bits/Target} $\rightarrow$ 4 bytes, codifica compatta della difficoltà richiesta per trovare un hash valido per risolvere il blocco.
     \item \textbf{Nonce} $\rightarrow$ 4 bytes, numero arbitrario trovato dai miners che rende l'hash del blocco valido, ossia inferiore al target. Se tutti i valori a 32 bit vengono tentati si può aggiornate il timestamp o la Merkle root.
 \end{itemize}
 
-Per quanto riguarda invece il body del blocco si nota che il primo elemento all'interno dell'elenco delle transazioni e la cosiddetta \textbf{coinbase transaction}, ossia i nuovi bitcoin che sono stati generati e dati come ricompensa al miner che ha risolta il blocco in questione. Questo meccanismo, noto come \textbf{block reward}, rappresenta l'unico modo con cui vengono emessi nuovi bitcoin nel sistema. ~\cite{nakamoto2008bitcoin}~\cite{bitcoin_dev_blockchain}
+I Merkle tree permettono di rappresentare in modo compatto l’insieme delle transazioni incluse in un blocco. Attraverso una struttura ad albero basata su funzioni hash, è possibile verificare l’appartenenza di una singola transazione al blocco senza dover scaricare l’intero contenuto, proprietà fondamentale per i nodi leggeri. \cite{provino_merkle}
+
+Per quanto riguarda invece il body del blocco si nota che il primo elemento all'interno dell'elenco delle transazioni e la cosiddetta \textbf{coinbase transaction}, ossia i nuovi bitcoin che sono stati generati e dati come ricompensa al miner che ha risolta il blocco in questione. Questo meccanismo, noto come \textbf{block reward}, rappresenta l'unico modo con cui vengono emessi nuovi bitcoin nel sistema. ~\cite{bitcoin_dev_blockchain}
+
+La struttura dei blocchi e la loro concatenazione tramite Proof-of-Work forniscono una nozione condivisa di tempo e finalità, che viene sfruttata direttamente dai protocolli di secondo livello per gestire vincoli temporali e risolvere eventuali dispute.
+
 
 \section{Proof-of-Work: meccanismo di consenso e arbitraggio}
 \section{Transaction malleability e introduzione di SegWit}
+\section{Bitcoin come livello base per il Lightning Network}
 
 %----------------------------------------------------------------------------------------
 \chapter{Architettura e funzionamento dei canali di pagamento}

@@ -114,3 +114,27 @@
   pages     = {199--203},
   year      = {1983}
 }
+
+@misc{bitcoin_dev_blockchain,
+  title = {Blockchain --- Bitcoin Developer Reference},
+  author = {{Bitcoin Developers}},
+  year = {2025},
+  url = {https://developer.bitcoin.org/devguide/block_chain.html},
+  note = {Consultato il 23 ottobre 2025}
+}
+
+@misc{bolt1_protocol,
+  title={BOLT \#1: Base Protocol},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/01-protocol.md}},
+  note={Specifica tecnica del protocollo Lightning Network, v1.0}
+}
+
+@misc{provino_merkle,
+  author = {Provino, Andrea},
+  title  = {Merkle Tree e Blockchain},
+  year   = {2020},
+  url    = {https://www.andreaprovino.it/merkle-tree},
+  note   = {Consultato il 23 ottobre 2025}
+}

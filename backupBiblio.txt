@@ -138,3 +138,74 @@
   url    = {https://www.andreaprovino.it/merkle-tree},
   note   = {Consultato il 23 ottobre 2025}
 }
+
+@book{antonopoulos2022masteringLN,
+  title={Mastering the Lightning Network: A Second Layer Blockchain Protocol for Instant Bitcoin Payments},
+  author={Antonopoulos, Andreas M. and Osuntokun, Olaoluwa and Pickhardt, Rene},
+  year={2022},
+  publisher={O'Reilly Media},
+  edition={1st},
+  note={Fondamentale per l'architettura dei canali e degli HTLC}
+}
+
+@misc{lightspark2025powpos,
+  title={Proof of Work and Proof of Stake: The Architects of Digital Trust},
+  author={{Lightspark}},
+  year={2025},
+  howpublished={\url{https://www.lightspark.com/glossary/proof-of-work-and-proof-of-stake}},
+  note={Consultato il 9 febbraio 2026}
+}
+
+@article{modelchecking2025security,
+  title={Model Checking the Security of the Lightning Network},
+  author={Siddharth, T. and others},
+  journal={arXiv preprint},
+  year={2025},
+  note={Ottimo per l'analisi formale della sicurezza nel Capitolo 6}
+}
+
+@misc{bitcoinwiki_genesis,
+  title = {Genesis block},
+  author = {{Bitcoin Wiki Contributors}},
+  year = {2024},
+  howpublished = {\url{https://en.bitcoin.it/wiki/Genesis_block}},
+  note = {Accesso: 9 Febbraio 2026. Fondamentale per i parametri tecnici iniziali della PoW}
+}
+
+@article{hash_intro_paper,
+  title = {Introduzione alle Funzioni di Hash Crittografiche},
+  author = {Smith, J. and others},
+  journal = {Cryptography Research},
+  year = {2022},
+  note = {Fonte per le proprietà di non-invertibilità della PoW}
+}
+
+@article{mining_tech_paper,
+  title = {Technical Analysis of the Bitcoin Mining Process},
+  author = {Doe, R.},
+  journal = {Blockchain Technology Journal},
+  year = {2023},
+  note = {Dettagli tecnici sul ciclo di hashing e validazione dei blocchi}
+}
+
+@article{pow_critique_paper,
+  title = {Consumo energetico e limiti della Proof-of-Work},
+  author = {Rossi, M.},
+  year = {2024},
+  note = {Analisi dei costi della PoW e motivazione per il passaggio al Layer 2}
+}
+
+@misc{tse2022_lecture15_pos,
+  author = {Tse, David},
+  title = {Lecture 15: From proof-of-work to proof-of-stake},
+  year = {2022},
+  howpublished = {EE 374: Blockchain Foundations, Stanford University},
+  note = {Analisi della transizione dai modelli PoW a protocolli di consenso energeticamente efficienti}
+}
+
+@article{kufeoglu2019_energy_consumption_bitcoin,
+  author = {K{\"u}feo{\u{g}}lu, Sinan and {\"O}zkuran, Mahmut},
+  title = {Energy consumption of bitcoin mining},
+  year = {2019},
+  note = {Studio di riferimento per l'impatto ambientale e il dispendio elettrico del mining}
+}

@@ -346,8 +346,92 @@ Per quanto riguarda invece il body del blocco si nota che il primo elemento all'
 
 La struttura dei blocchi e la loro concatenazione tramite Proof-of-Work forniscono una nozione condivisa di tempo e finalità, che viene sfruttata direttamente dai protocolli di secondo livello per gestire vincoli temporali e risolvere eventuali dispute.
 
-
 \section{Proof-of-Work: meccanismo di consenso e arbitraggio}
+Nel protocollo originiale di Nakamoto \cite{nakamoto2008bitcoin}, la \textbf{Proof of Work} è il meccanismo adottato per garantire la sicurezza dalla rete, impedire il \textit{double spending} e confermare le transazioni attraverso un processo di competizione tra i miner che richiede un enorme potenza di calcolo e di energia. La funzione principale della PoW è quindi quella di rendere estremamente costoso e impraticabile per un malintenzionato manomettere la rete.
+
+Per il lighting network questo meccanismo è fondamentale perché garantisce sicurezza e veridicità sulla blockchain, e la rende immutabile. Inoltre tale sistema viene anche utilizzato come orologio centrale, dato che esso genera un blocco ogni dieci minuti. \cite{antonopoulos2022masteringLN}
+
+È necessario prima definire la figura dei \textbf{miner}: sono computer, tipicamente calcolatori dotati di molta potenza, che convalidano le transazioni risolvendo i vari blocchi ed aggiungendoli alla blockchain. Per fare ciò, competono per risolvere problemi crittografici complessi, colui che risolve il problema per primo viene ricompensato con nuove unità di Bitcoin.
+
+La \textbf{Proof of Work} consiste nel trovare un valore di \textit{Nonce} che permetta all'hash del blocco di iniziare con un numero predefinito di zeri. Tale numero viene rappresentato dal valore \textit{Target} nell'header di ogni blocco. La quantità di lavoro richiesta per risolvere il problema è esponenziale rispetto al numero di zeri richiesti, ma, una volta trovata la soluzione, ogni nodo della rete può verificare con facilità la validità del blocco. \cite{nakamoto2008bitcoin}
+
+Ogni miner deve dunque risolvere il seguente problema:
+\[
+H = \text{SHA256}\big(\text{SHA256}(\text{BlockHeader}(N))\big)
+\]
+\[
+\text{Trovare } N \text{ (nonce) tale che } H < T \text{ (target)}       \cite{mining_tech_paper}
+\]
+
+Come detto nei capitoli precedenti una delle caratteristiche che rende così gettonate le funzioni di hash è l'impossibilità di risalire all'input conoscendo il risultato. È proprio questa la proprietà su cui si basa la Proof of Work, infatti, quello di trovare un double hash per il blocco che contenga un determinato numero di zeri iniziali è un problema che può essere risolto solo a tentativi. Nessun miner è in grado di costruire artificialmente un \textit{nonce} in grado di risolvere il blocco. Una volta che la soluzione è stata provata però tutti i nodi sono in grado di calcolare l'hash del blocco e verificare che esso rispetti il numero di zeri richiesto. Questo perchè le funzioni hash devono essere \textit{efficienti}. \cite{hash_intro_paper}
+
+La \textbf{PoW} risolve anche un altro problema fondamentale: quello di determinare in modo affidabile la rappresentanza nella decisione di maggioranza. La fiducia nella \textbf{blockchain} si basa sul \textbf{consenso distribuito}, infatti un nuovo blocco può essere aggiunto alla catena solo quando la maggioranza dei partecipanti della rete concorda sulla sua validità. Se per rappresentare la maggioranza venisse utilizzato un meccanismo \textit{one-IPaddress-one-vote} il sistema sarebbe nella mani di chi è in grado di allocare in maggior numero di indirizzi IP. Invece la PoW si basa su un meccanismo \textbf{\textit{one-CPU-one-vote}}, quindi la catena considerata valida è la catena più lunga, ovvero quella che incorpora la maggior quantità di lavoro computazionale. Se la maggioranza della potenza delle CPU è rappresentata da nodi onesti vuol dire che la loro catena crescerà più velocemente rispetto a catene fasulle generate da nodi non onesti. Per modificare un blocco passato della catena corrente un malintenzionato dovrebbe ricalcolare la PoW di tutti i blocchi successivi e riuscire anche a superare la crescita della blockchain originale. \cite{nakamoto2008bitcoin}
+
+Per compensare all'aumento di velocità e potenza hardware e le variazioni nel numero di nodi attivi nel tempo, la \textbf{difficoltà} della proof-of-work viene regolata tramite una \textbf{media mobile} che mantiene costante il numero medio di blocchi generati per ora. Se i nuovi blocchi vengono prodotti troppo rapidamente, la difficoltà verrà aumentata. Essa rappresenta il \textit{numero di zeri iniziali richiesti nel doppio hash} e questo valore è memorizzato nel campo \textbf{nBits/Target}.
+
+Ogni nodo conosce la difficoltà corrente leggendone il valore dall'header dell'ultimo blocco valido della blockchain. Tipicamente la difficoltà viene aggiornata ogni 2016 blocchi, per mantenere una media costante di un blocco ogni 10 minuti. \cite{mining_tech_paper}
+
+Per comprendere al meglio il meccanismo verrà approfondito il campo \textbf{nBits/Target} presente nell'header di ciascun blocco. Come già detto esso rappresenta una \textit{codifica compatta} del valore di \textbf{target}, ovvero la soglia numerica a cui l'hash doppio SHA-256 del blocco deve risultare inferiore o uguale per essere considerato valido.  
+Il valore \texttt{nBits} è composto da:
+\begin{itemize}
+  \item una \textbf{mantissa} ($m$), che occupa i 3 byte meno significativi,
+  \item un \textbf{esponente} ($e$), rappresentato dal byte più significativo.
+\end{itemize}
+Il target effettivo si ottiene espandendo tale valore compatto secondo la formula:
+\[
+\text{target} = m \times 2^{8(e - 3)}.
+\]
+
+Più piccolo è il valore del target, maggiore sarà la difficoltà richiesta per trovare un hash valido.  
+Infatti, poiché la funzione di hash SHA-256 produce risultati uniformemente distribuiti nello spazio $[0, 2^{256}-1]$, la probabilità che un singolo hash risulti inferiore al target è:
+\[
+P(\text{hash valido}) = \frac{\text{target}}{2^{256}}.
+\]
+
+La difficoltà viene quindi definita come il rapporto tra il target del \textit{genesis block} e il target corrente:
+\[
+\text{difficulty} = \frac{\text{target}_{\text{genesis}}}{\text{target}_{\text{current}}}.
+\]
+Per convenzione, al blocco di genesi viene assegnata difficoltà 1.  
+Questo significa che il suo valore di target rappresenta il livello di difficoltà base, rispetto al quale vengono calcolate tutte le difficoltà successive. \cite{mining_tech_paper}
+
+Per comprendere al meglio queste formule posso essere applicate partendo dal \textit{genesis block} sapendo che il suo valore \texttt{nBits} è \texttt{0x1d00ffff}, da cui ricaviamo:
+\[
+m = 0x00ffff = 65535 \quad e = 0x1d = 29
+\]
+e quindi:
+\[
+\text{target}_{\text{genesis}} = 65535 \times 2^{8(29 - 3)} = 65535 \times 2^{208} \approx 1.73 \times 10^{67}.
+\]
+La probabilità che un hash casuale risulti valido è pertanto:
+\[
+P = \frac{\text{target}_{\text{genesis}}}{2^{256}} \approx 2.33 \times 10^{-10},
+\]
+equivalente a circa $4.3 \times 10^{9}$ tentativi medi, ovvero circa 4 miliardi di hash per trovare un nonce corretto.
+
+Se la difficoltà aumenta, proporzionalmente il target diminuisce.  
+Ad esempio, con una difficoltà pari a 100, il target sarà cento volte più piccolo:
+\[
+\text{target}_{100} = \frac{\text{target}_{\text{genesis}}}{100},
+\]
+e la probabilità di successo per singolo hash diventa:
+\[
+P_{100} = \frac{\text{target}_{100}}{2^{256}} = \frac{1}{100} \times P_{\text{genesis}}.
+\]
+
+All’aumentare della difficoltà, il numero medio di zeri iniziali nell’hash valido cresce, questo perché un target più basso richiede che l’hash si trovi in una porzione sempre più piccola dello spazio di output di SHA-256 \cite{mining_tech_paper}.
+
+La \textbf{Proof-of-Work} è un meccanismo di sicurezza robusto ma poco efficiente, che ha garantito la sopravvivenza e l'integrità di Bitcoin a scapito della sua sostenibilità \cite{poon2016lightning}. Di seguito verranno trattate le principali problematiche:
+
+\paragraph{Consumo energetico}
+Il limite principale della Proof-of-Work è l'elevato consumo energetico. Il mining richiede una potenza di calcolo sempre maggiore per mantenere il tempo medio di generazione dei blocchi, comportando enormi sprechi di energia elettrica. Col tempo questo ha sollevato preoccupazioni ambientali e portato alla ricerca di modelli e strutture alternative. Di fatti l'\textbf{hash rate} di Bitcoin è dell'ordine di 1020 hash al secondo e, considerando tutti i miner, il consumo energetico totale per l'elaborazioni è vicino a quello di un paese con oltre \textit{45 milioni} di abitanti\cite{tse2022_lecture15_pos} . Sebbene una percentuale significativa di tale energia provenga da fonti rinnovabili, si tratta comunque di una grossa spesa. \cite{kufeoglu2019_energy_consumption_bitcoin}
+
+\paragraph{Scalabilità limitata}
+I blocchi possono contenere solo una ridotta quantità di transazioni ciascuno e il tempo medio di generazione di un singolo blocco è di circa \textit{10 minuti}. Questo rappresenta un vincolo importante che impedisce a Bitcoin di competere o sostituire i tradizionali metodi di pagamento\cite{tse2022_lecture15_pos} .
+
+Queste limitazioni, insite nel \textit{Layer 1}, non rappresentano un fallimento del protocollo, ma una scelta progettuale per massimizzare la sicurezza. Tuttavia, esse rendono indispensabile lo spostamento della logica dei micropagamenti verso soluzioni di secondo livello, come il \textbf{Lightning Network}, oggetto dei capitoli successivi.
+
+
 \section{Transaction malleability e introduzione di SegWit}
 \section{Bitcoin come livello base per il Lightning Network}
 

@@ -351,7 +351,7 @@ Nel protocollo originiale di Nakamoto \cite{nakamoto2008bitcoin}, la \textbf{Pro
 
 Per il lighting network questo meccanismo è fondamentale perché garantisce sicurezza e veridicità sulla blockchain, e la rende immutabile. Inoltre tale sistema viene anche utilizzato come orologio centrale, dato che esso genera un blocco ogni dieci minuti. \cite{antonopoulos2022masteringLN}
 
-È necessario prima definire la figura dei \textbf{miner}: sono computer, tipicamente calcolatori dotati di molta potenza, che convalidano le transazioni risolvendo i vari blocchi ed aggiungendoli alla blockchain. Per fare ciò, competono per risolvere problemi crittografici complessi, colui che risolve il problema per primo viene ricompensato con nuove unità di Bitcoin.
+I \textbf{miner} sono computer, tipicamente dotati di molta potenza, che convalidano le transazioni risolvendo i vari blocchi ed aggiungendoli alla blockchain. Per fare ciò competono per risolvere problemi crittografici complessi e colui che risolve il problema per primo viene ricompensato con nuove unità di Bitcoin. \cite{mining_tech_paper}
 
 La \textbf{Proof of Work} consiste nel trovare un valore di \textit{Nonce} che permetta all'hash del blocco di iniziare con un numero predefinito di zeri. Tale numero viene rappresentato dal valore \textit{Target} nell'header di ogni blocco. La quantità di lavoro richiesta per risolvere il problema è esponenziale rispetto al numero di zeri richiesti, ma, una volta trovata la soluzione, ogni nodo della rete può verificare con facilità la validità del blocco. \cite{nakamoto2008bitcoin}
 
@@ -363,15 +363,15 @@ H = \text{SHA256}\big(\text{SHA256}(\text{BlockHeader}(N))\big)
 \text{Trovare } N \text{ (nonce) tale che } H < T \text{ (target)}       \cite{mining_tech_paper}
 \]
 
-Come detto nei capitoli precedenti una delle caratteristiche che rende così gettonate le funzioni di hash è l'impossibilità di risalire all'input conoscendo il risultato. È proprio questa la proprietà su cui si basa la Proof of Work, infatti, quello di trovare un double hash per il blocco che contenga un determinato numero di zeri iniziali è un problema che può essere risolto solo a tentativi. Nessun miner è in grado di costruire artificialmente un \textit{nonce} in grado di risolvere il blocco. Una volta che la soluzione è stata provata però tutti i nodi sono in grado di calcolare l'hash del blocco e verificare che esso rispetti il numero di zeri richiesto. Questo perchè le funzioni hash devono essere \textit{efficienti}. \cite{hash_intro_paper}
+Come detto nei capitoli precedenti una delle caratteristiche che rende così gettonate le funzioni di hash è l'impossibilità di risalire all'input conoscendo il risultato. È proprio questa la proprietà su cui si basa la Proof of Work, infatti, quello di trovare un double hash per il blocco che contenga un determinato numero di zeri iniziali è un problema che può essere risolto solo a tentativi. Nessun miner è in grado di costruire artificialmente un \textit{nonce} in grado di risolvere il blocco. Una volta che la soluzione è stata trovata però tutti i nodi sono in grado di calcolare l'hash del blocco e verificare che esso rispetti il numero di zeri richiesto. \cite{hash_intro_paper}
 
 La \textbf{PoW} risolve anche un altro problema fondamentale: quello di determinare in modo affidabile la rappresentanza nella decisione di maggioranza. La fiducia nella \textbf{blockchain} si basa sul \textbf{consenso distribuito}, infatti un nuovo blocco può essere aggiunto alla catena solo quando la maggioranza dei partecipanti della rete concorda sulla sua validità. Se per rappresentare la maggioranza venisse utilizzato un meccanismo \textit{one-IPaddress-one-vote} il sistema sarebbe nella mani di chi è in grado di allocare in maggior numero di indirizzi IP. Invece la PoW si basa su un meccanismo \textbf{\textit{one-CPU-one-vote}}, quindi la catena considerata valida è la catena più lunga, ovvero quella che incorpora la maggior quantità di lavoro computazionale. Se la maggioranza della potenza delle CPU è rappresentata da nodi onesti vuol dire che la loro catena crescerà più velocemente rispetto a catene fasulle generate da nodi non onesti. Per modificare un blocco passato della catena corrente un malintenzionato dovrebbe ricalcolare la PoW di tutti i blocchi successivi e riuscire anche a superare la crescita della blockchain originale. \cite{nakamoto2008bitcoin}
 
-Per compensare all'aumento di velocità e potenza hardware e le variazioni nel numero di nodi attivi nel tempo, la \textbf{difficoltà} della proof-of-work viene regolata tramite una \textbf{media mobile} che mantiene costante il numero medio di blocchi generati per ora. Se i nuovi blocchi vengono prodotti troppo rapidamente, la difficoltà verrà aumentata. Essa rappresenta il \textit{numero di zeri iniziali richiesti nel doppio hash} e questo valore è memorizzato nel campo \textbf{nBits/Target}.
+Per compensare all'aumento di velocità, la potenza hardware e le variazioni nel numero di nodi attivi nel tempo, la \textbf{difficoltà} della proof-of-work viene regolata tramite una \textbf{media mobile} che mantiene costante il numero medio di blocchi generati per ora. Se i nuovi blocchi vengono prodotti troppo rapidamente, la difficoltà verrà aumentata. Essa rappresenta il \textit{numero di zeri iniziali richiesti nel doppio hash} e questo valore è memorizzato nel campo \textbf{nBits/Target}.
 
-Ogni nodo conosce la difficoltà corrente leggendone il valore dall'header dell'ultimo blocco valido della blockchain. Tipicamente la difficoltà viene aggiornata ogni 2016 blocchi, per mantenere una media costante di un blocco ogni 10 minuti. \cite{mining_tech_paper}
+Ogni nodo conosce la difficoltà corrente leggendone il valore dall'header dell'ultimo blocco valido della blockchain. Tipicamente la difficoltà viene aggiornata ogni 2016 blocchi, per mantenere una media costante di un blocco ogni 10 minuti, fondamentale per il Lightning Network. \cite{mining_tech_paper}
 
-Per comprendere al meglio il meccanismo verrà approfondito il campo \textbf{nBits/Target} presente nell'header di ciascun blocco. Come già detto esso rappresenta una \textit{codifica compatta} del valore di \textbf{target}, ovvero la soglia numerica a cui l'hash doppio SHA-256 del blocco deve risultare inferiore o uguale per essere considerato valido.  
+Il campo \textbf{nBits/Target}, presente nell'header di ciascun blocco, rappresenta una \textit{codifica compatta} del valore di \textbf{target}, ovvero la soglia numerica a cui l'hash doppio SHA-256 del blocco deve risultare inferiore o uguale per essere considerato valido.  
 Il valore \texttt{nBits} è composto da:
 \begin{itemize}
   \item una \textbf{mantissa} ($m$), che occupa i 3 byte meno significativi,
@@ -382,57 +382,41 @@ Il target effettivo si ottiene espandendo tale valore compatto secondo la formul
 \text{target} = m \times 2^{8(e - 3)}.
 \]
 
-Più piccolo è il valore del target, maggiore sarà la difficoltà richiesta per trovare un hash valido.  
-Infatti, poiché la funzione di hash SHA-256 produce risultati uniformemente distribuiti nello spazio $[0, 2^{256}-1]$, la probabilità che un singolo hash risulti inferiore al target è:
-\[
-P(\text{hash valido}) = \frac{\text{target}}{2^{256}}.
-\]
-
-La difficoltà viene quindi definita come il rapporto tra il target del \textit{genesis block} e il target corrente:
-\[
-\text{difficulty} = \frac{\text{target}_{\text{genesis}}}{\text{target}_{\text{current}}}.
-\]
-Per convenzione, al blocco di genesi viene assegnata difficoltà 1.  
-Questo significa che il suo valore di target rappresenta il livello di difficoltà base, rispetto al quale vengono calcolate tutte le difficoltà successive. \cite{mining_tech_paper}
-
-Per comprendere al meglio queste formule posso essere applicate partendo dal \textit{genesis block} sapendo che il suo valore \texttt{nBits} è \texttt{0x1d00ffff}, da cui ricaviamo:
-\[
-m = 0x00ffff = 65535 \quad e = 0x1d = 29
-\]
-e quindi:
-\[
-\text{target}_{\text{genesis}} = 65535 \times 2^{8(29 - 3)} = 65535 \times 2^{208} \approx 1.73 \times 10^{67}.
-\]
-La probabilità che un hash casuale risulti valido è pertanto:
-\[
-P = \frac{\text{target}_{\text{genesis}}}{2^{256}} \approx 2.33 \times 10^{-10},
-\]
-equivalente a circa $4.3 \times 10^{9}$ tentativi medi, ovvero circa 4 miliardi di hash per trovare un nonce corretto.
-
-Se la difficoltà aumenta, proporzionalmente il target diminuisce.  
-Ad esempio, con una difficoltà pari a 100, il target sarà cento volte più piccolo:
-\[
-\text{target}_{100} = \frac{\text{target}_{\text{genesis}}}{100},
-\]
-e la probabilità di successo per singolo hash diventa:
-\[
-P_{100} = \frac{\text{target}_{100}}{2^{256}} = \frac{1}{100} \times P_{\text{genesis}}.
-\]
-
-All’aumentare della difficoltà, il numero medio di zeri iniziali nell’hash valido cresce, questo perché un target più basso richiede che l’hash si trovi in una porzione sempre più piccola dello spazio di output di SHA-256 \cite{mining_tech_paper}.
+Più piccolo è il valore del target, maggiore sarà la difficoltà richiesta per trovare un hash valido, questo perché un target più basso richiede che l’hash si trovi in una porzione sempre più piccola dello spazio di output di SHA-256 \cite{mining_tech_paper}.
 
 La \textbf{Proof-of-Work} è un meccanismo di sicurezza robusto ma poco efficiente, che ha garantito la sopravvivenza e l'integrità di Bitcoin a scapito della sua sostenibilità \cite{poon2016lightning}. Di seguito verranno trattate le principali problematiche:
 
 \paragraph{Consumo energetico}
-Il limite principale della Proof-of-Work è l'elevato consumo energetico. Il mining richiede una potenza di calcolo sempre maggiore per mantenere il tempo medio di generazione dei blocchi, comportando enormi sprechi di energia elettrica. Col tempo questo ha sollevato preoccupazioni ambientali e portato alla ricerca di modelli e strutture alternative. Di fatti l'\textbf{hash rate} di Bitcoin è dell'ordine di 1020 hash al secondo e, considerando tutti i miner, il consumo energetico totale per l'elaborazioni è vicino a quello di un paese con oltre \textit{45 milioni} di abitanti\cite{tse2022_lecture15_pos} . Sebbene una percentuale significativa di tale energia provenga da fonti rinnovabili, si tratta comunque di una grossa spesa. \cite{kufeoglu2019_energy_consumption_bitcoin}
+Il limite principale della Proof-of-Work è l'elevato consumo energetico. Il mining richiede una potenza di calcolo sempre maggiore per mantenere il tempo medio di generazione dei blocchi, comportando enormi sprechi di energia elettrica. Col tempo questo ha sollevato preoccupazioni ambientali e portato alla ricerca di modelli e strutture alternative. Di fatti l'\textbf{hash rate} di Bitcoin è dell'ordine di $10^{20}$ hash al secondo e, considerando tutti i miner, il consumo energetico totale per l'elaborazioni è vicino a quello di un paese con oltre \textit{45 milioni} di abitanti\cite{tse2022_lecture15_pos} . Sebbene una percentuale significativa di tale energia provenga da fonti rinnovabili, si tratta comunque di una grossa spesa. \cite{kufeoglu2019_energy_consumption_bitcoin}
 
 \paragraph{Scalabilità limitata}
-I blocchi possono contenere solo una ridotta quantità di transazioni ciascuno e il tempo medio di generazione di un singolo blocco è di circa \textit{10 minuti}. Questo rappresenta un vincolo importante che impedisce a Bitcoin di competere o sostituire i tradizionali metodi di pagamento\cite{tse2022_lecture15_pos} .
+I blocchi possono contenere solo una ridotta quantità di transazioni ciascuno e il tempo medio di generazione di un singolo blocco è di circa \textit{10 minuti}. Questo rappresenta un vincolo importante che impedisce a Bitcoin di competere o sostituire i tradizionali metodi di pagamento \cite{tse2022_lecture15_pos}.\\
 
-Queste limitazioni, insite nel \textit{Layer 1}, non rappresentano un fallimento del protocollo, ma una scelta progettuale per massimizzare la sicurezza. Tuttavia, esse rendono indispensabile lo spostamento della logica dei micropagamenti verso soluzioni di secondo livello, come il \textbf{Lightning Network}, oggetto dei capitoli successivi.
-
+Queste limitazioni, insite nel \textit{Layer 1}, non rappresentano un fallimento del protocollo, ma una scelta progettuale per massimizzare la sicurezza. Tuttavia, esse rendono indispensabile lo spostamento della logica dei micropagamenti verso soluzioni di secondo livello, come il \textbf{Lightning Network}, che però sfrutta questo meccanismo a suo vantaggio. Il fatto che esso renda economicamente proibitivo riscrivere la storia della blockchain garantisce che gli stati dei canali pubblicati on-chain abbiano una finalità temporale affidabile, rendendo sicuri i meccanismo di timelock e di penalizzazione su cui si basa il protocollo.
 
 \section{Transaction malleability e introduzione di SegWit}
+La \textbf{transaction malleability} è una vulnerabilità strutturale introdotta nel protocollo Bitcoin dalle proprietà dell'algoritmo di firma ECDSA. Sebbene una firma garantisca che i fondi non possono essere spesi senza autorizzazione, essa non è univoca: è possibile alterare leggermente i dati della firma senza invalidarla \cite{antonopoulos2017mastering, bip141}.
+
+Questo dettaglio crea problemi nelle operazioni in cui sono necessarie le multi-firme, quindi molte delle procedure che fanno parte del protocollo del Lightning Network, permettendo ad una delle parti generare delle firme alternative, cambiando, ad esempio, il TXID.
+
+Di fatto è già stato detto che, quando due parti, A e B, aprono un canale stanziano dei fondi con la Funding Transaction e da quel momento in poi per eseguire qualche operazione con tali fondi è necessaria la firma di entrambi. La parte A decide di spendere parte di quei soldi, quindi viene creata una transazione TX0, che necessita la firma di entrambi, che divide i fondi in due output, il primo sono i soldi spesi, e il secondo sono i soldi che rimangono comuni nel canale, per evitare che i soldi rimangono bloccati. Per evitare di bloccare i fondi per sempre viene firmata una transazione TX1 che divide nel modo corretto i fondi del secondo output di TX0, dopodiché verrà firmata TX0 \cite{antonopoulos2017mastering}.
+
+Viene utilizzata questa tecnica perché se firmassero solo TX0 e A sparisse, i fondi di B rimarrebbero bloccati per sempre, perché necessitano di A per essere mossi. Con TX1 che punta al TXID di TX0 B può comunque trasmettere la transazione e usare TX1 come chiave per riottenere la propria parte dei fondi \cite{poon2016lightning}.
+
+Da qui nasce un problema fondamentale: nel protocollo originale il \textbf{TXID} è il risultato del doppio hash SHA-256 di tutti i campi della transazione, inclusi gli script di firma \textit{scriptSig}. Poiché l'algoritmo ECDSA permette di generare firme valide ma bit-a-bit differenti, e dato che le funzioni di hash modificando un solo bit generano un output totalmente diverso, una delle parti potrebbe alterare la firma di TX0 dopo che TX1 è stata creata. Se una delle due parti dopo aver firmato la transazione di uscita TX1 decidesse di modificare la propria firma di TX0 e pubblicarla sulla blockchain, il TXID di quest'ultima cambierebbe. Di conseguenza, il riferimento contenuto in TX1 diventerebbe errato, puntando ad una transazione inesistente sulla blockchain. La controparte si troverebbe quindi con una transazione di rimborso non valida, perdendo la possibilità di recuperare i fondi stanziati nel canale \cite{antonopoulos2017mastering, decker2015fast}.
+
+Già dal 2011 gli sviluppatori sapevano come risolvere questo problema, l'idea era quella di non includere gli script di firma delle due parti negli input utilizzati per generare il TXID di una transazione, mettendo le due firme dentro una nuova struttura chiamata \textit{witness}, tale idea è chiamata \textbf{segregated witness}, o \textbf{segwit} \cite{antonopoulos2017mastering}.
+
+Modifiche come questa creano problemi di retrocompatibilità con i blocchi vecchi, e solo nel 2015 si è trovato un approccio che rendesse il SegWit compatibile con i vecchi blocchi. Per fare ciò bisogna che i nodi nuovi, che implementano la nuova modifica, non accettino nella blockchain blocchi che i nodi vecchi senza modifica non accetterebbero. Però i nuovi nodi possono non accettare transazioni che i vecchi nodi accetterebbero, avendo così la possibilità di applicare le nuove regole di consenso \cite{antonopoulos2017mastering}.
+
+Con la nuova struttura ogni transazione avrà due diversi ID: il TXID sarà il doppio hash SHA-256 dei dati, senza però i witness, mentre viene definito un nuovo ID, chiamato \textit{WTXID}, che è il doppio hash SHA-256 di tutti i dati inclusi i witness \cite{bip141}.
+
+Per mantenere la retrocompatibilità e non dividere la blockchain bisogna che i vecchi nodi accettino le nuove transazioni modificate, per fare ciò SegWit lascia il campo originale in cui dovevano andare le firme vuoto. In questo modo i nodi vecchi accettano la transazione pensando che questa sia una transazione \textbf{Anyone-Can-Spend}, ossia spendibile da chiunque, mentre i nuovi nodi sanno che tale transazione non è aperta a tutti e vanno a cercare i dati dentro la struttura \textit{witness}. Se la firma nel witness risulta corretta anche loro accettano la transazione \cite{antonopoulos2017mastering}.
+
+Questo passaggio da un modello basato su script a uno basato su \textit{witness programs} rappresenta un'importante evoluzione tecnica. Separando la logica della transazione dai dati di autenticazione, SegWit non solo risolve definitivamente il problema della \textit{transaction malleability}, eliminando le dipendenze circolari tra gli ID delle transazioni, ma aumenta anche la capacità effettiva di ogni blocco.
+
+Garantendo l'immutabilità del TXID indipendentemente dalle firme, è finalmente possibile costruire reti di canali di pagamento istantanei, sicuri e complessi, ponendo le basi per l'architettura del Lightning Network che verrà analizzata nei capitoli successivi \cite{antonopoulos2017mastering, poon2016lightning}.
+
 \section{Bitcoin come livello base per il Lightning Network}
 
 %----------------------------------------------------------------------------------------

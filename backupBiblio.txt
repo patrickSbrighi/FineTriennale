@@ -172,29 +172,6 @@
   note = {Accesso: 9 Febbraio 2026. Fondamentale per i parametri tecnici iniziali della PoW}
 }
 
-@article{hash_intro_paper,
-  title = {Introduzione alle Funzioni di Hash Crittografiche},
-  author = {Smith, J. and others},
-  journal = {Cryptography Research},
-  year = {2022},
-  note = {Fonte per le proprietà di non-invertibilità della PoW}
-}
-
-@article{mining_tech_paper,
-  title = {Technical Analysis of the Bitcoin Mining Process},
-  author = {Doe, R.},
-  journal = {Blockchain Technology Journal},
-  year = {2023},
-  note = {Dettagli tecnici sul ciclo di hashing e validazione dei blocchi}
-}
-
-@article{pow_critique_paper,
-  title = {Consumo energetico e limiti della Proof-of-Work},
-  author = {Rossi, M.},
-  year = {2024},
-  note = {Analisi dei costi della PoW e motivazione per il passaggio al Layer 2}
-}
-
 @misc{tse2022_lecture15_pos,
   author = {Tse, David},
   title = {Lecture 15: From proof-of-work to proof-of-stake},
@@ -208,4 +185,49 @@
   title = {Energy consumption of bitcoin mining},
   year = {2019},
   note = {Studio di riferimento per l'impatto ambientale e il dispendio elettrico del mining}
+}
+
+@techreport{hash_intro_paper,
+  author      = {Miller, Spencer},
+  title       = {MMH32 from Scratch: An Introduction to Hash Functions},
+  institution = {University of Chicago},
+  year        = {2017},
+  note        = {REU Program in Mathematics},
+  url         = {http://math.uchicago.edu/~may/REU2017/REUPapers/Miller,Spencer.pdf}
+}
+
+@article{mining_tech_paper,
+  author  = {Courtois, Nicolas T. and Grajek, Marek and Naik, Rahul},
+  title   = {The Unreasonable Fundamental Incertitudes Behind Bitcoin Mining},
+  journal = {arXiv preprint arXiv:1310.7935},
+  year    = {2014},
+  url     = {https://arxiv.org/abs/1310.7935}
+}
+
+@techreport{pow_critique_paper,
+  author      = {K{\"u}feo{\u{g}}lu, Sinan and {\"O}zkuran, Mahmut},
+  title       = {Energy Consumption of Bitcoin Mining},
+  institution = {University of Cambridge, Faculty of Economics},
+  year        = {2019},
+  type        = {Cambridge Working Papers in Economics},
+  number      = {1948},
+  url         = {https://www.econ.cam.ac.uk/research-files/repec/cam/pdf/cwpe1948.pdf}
+}
+
+@misc{bip141,
+  title        = {BIP 141: Segregated Witness (Consensus Layer)},
+  author       = {Lombrozo, Eric and Lau, Johnson and Wuille, Pieter},
+  year         = {2015},
+  howpublished = {\url{https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki}},
+  note         = {Specifica tecnica fondamentale per la risoluzione della malleabilità}
+}
+
+@inproceedings{decker2015fast,
+  title        = {A fast and scalable payment network with bitcoin duplex micropayments},
+  author       = {Decker, Christian and Wattenhofer, Roger},
+  booktitle    = {International Conference on Networked Systems},
+  pages        = {3--12},
+  year         = {2015},
+  organization = {IEEE},
+  note         = {Analisi fondamentale sulla malleabilità e i canali di pagamento}
 }

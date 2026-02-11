@@ -231,3 +231,19 @@
   organization = {IEEE},
   note         = {Analisi fondamentale sulla malleabilità e i canali di pagamento}
 }
+
+@misc{bolt2_peer,
+  title={BOLT \#2: Peer Protocol for Channel Management},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/02-peer-protocol.md}},
+  note={Specifica dei messaggi di apertura, aggiornamento e chiusura dei canali}
+}
+
+@misc{bolt8_transport,
+  title={BOLT \#8: Encrypted and Authenticated Transport},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/08-transport.md}},
+  note={Specifica del protocollo di trasporto cifrato basato su Noise Protocol Framework}
+}

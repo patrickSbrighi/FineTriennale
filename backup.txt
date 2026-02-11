@@ -435,16 +435,46 @@ L'architettura del Lightning Network nasce con l'obiettivo di combinare la sicur
 
 Di seguito vengono delineate le caratteristiche distintive che rendono questa rete superiore ai sistemi di pagamento tradizionali e alle transazioni on-chain:
 \begin{itemize}
-    \item Velocità e Finalità immediata: a differenza di Bitcoin, dove è necessario attendere la conferma dei miner, i pagamenti su Lightning Network si concludono in pochi secondi. Una volta scambiate le firme, la transazione è considerata finale e irreversibile tra le parti.
-    \item Privacy e Risparmio di risorse: le transazioni che avvengono off-chain rimangono tra i partecipanti del canale, non vengono trasmesse in broadcast a tutta la rete. Non dovendo essere memorizzate nella blockchain globale richiedono pochissime risorse computazionali e di archiviazione \cite{poon2016lightning}.
-    \item Utilizzo dell'asset nativo: il Lightning Network non impiega token proprietari, ma opera direttamente con Bitcoin, garantendo che l'utente mantenga la custodia dei fondi e la sicurezza crittografica del livello base.
+    \item \textbf{Velocità e Finalità immediata}: a differenza di Bitcoin, dove è necessario attendere la conferma dei miner, i pagamenti su Lightning Network si concludono in pochi secondi. Una volta scambiate le firme, la transazione è considerata finale e irreversibile tra le parti.
+    \item \textbf{Privacy e Risparmio di risorse}: le transazioni che avvengono off-chain rimangono tra i partecipanti del canale, non vengono trasmesse in broadcast a tutta la rete. Non dovendo essere memorizzate nella blockchain globale richiedono pochissime risorse computazionali e di archiviazione \cite{poon2016lightning}.
+    \item \textbf{Utilizzo dell'asset nativo}: il Lightning Network non impiega token proprietari, ma opera direttamente con Bitcoin, garantendo che l'utente mantenga la custodia dei fondi e la sicurezza crittografica del livello base.
 \end{itemize}
 
 L'intero funzionamento si basa sulla creazione di un contratto intelligente che regola lo scambio di fondi tra due nodi. Nelle sezioni seguenti vedremo come queste proprietà teoriche vengano concretizzate in operazioni crittografiche, partendo dalla creazione di un canale fino alla sua risoluzione \cite{antonopoulos2022masteringLN}.
 
-\section{Apertura, gestione e chiusura di un canale}
+\section{Apertura del canale}
+Prima che due nodi possano aprire un canale, è necessario che stabiliscano una connessione sicura e autenticata a livello di trasporto. I nodi Lightning comunicano su TCP/IP e utilizzano un protocollo crittografico specifico, derivato dal framework \textit{Noise Protocol}, per garantire la riservatezza e l'integrità dei dati scambiati.
+
+Durante questa fase, nota come \textit{handshake}, i nodi si scambiano le chiavi pubbliche e generano una chiave di sessione effimera. Solo una volta stabilito questo tunnel cifrato, i peer possono iniziare a scambiare i messaggi definiti nel protocollo BOLT (Basis of Lightning Technology) per la gestione del canale \cite{bolt8_transport}.
+
+Il processo di apertura di un canale di Lightning Network è avviato da uno dei due nodi, definito il \textit{funder}, che intende impegnare i propri fondi nel canale. La procedura segue uno schema preciso volto a garantire che nessuna delle due parti possa perdere i fondi, nemmeno in caso di disconnessione o malfunzionamento della controparte durante il processo \cite{antonopoulos2022masteringLN}.
+
+Come illustrato in Figura \ref{fig:channel_opening_flow}, il protocollo prevede che il fondatore del canale invii un messaggio, chiamato \texttt{open\_channel},  alla controparte, contenente i parametri tecnici ed economici del canale. La controparte, che viene chiamata \textit{fundee}, può scegliere se accettare le condizioni proposte, rispondendo con il messaggio \texttt{accept\_channel}, fornendo la propria chiave pubblica temporanea per il multisig e i propri parametri di sicurezza, oppure rifiutare. 
+
+Nel caso in cui la controparte accettasse, il funder costruisce la \textit{Funding Transaction}, che deposita i fondi nel multisig, ma non la trasmette ancora alla rete Bitcoin. Prima, crea la prima versione della \textit{Commitment Transaction}, la transazione di rimborso, che gli permette di recuperare i fondi in caso di problemi. Invia quindi la firma per la Commitment Transaction della controparte tramite il messaggio \texttt{funding\_created}. Il fundee riceve la firma, verifica la transazione e, a sua volta, invia la propria firma per la Commitment Transaction del funder tramite il messaggio \texttt{funding\_signed} \cite{bolt2_peer}.
+
+Solo dopo aver ricevuto il messaggio \texttt{funding\_signed}, il funder ha la certezza matematica di poter recuperare i propri fondi in caso di mancata cooperazione della controparte. Solo in questo momento trasmette la \textit{Funding Transaction} alla blockchain di Bitcoin. Entrambi i nodi monitorano la blockchain. Quando la Funding Transaction viene confermata, i nodi si scambiano il messaggio \texttt{funding\_locked}. Da questo istante, il canale è considerato attivo e può processare pagamenti off-chain \cite{antonopoulos2022masteringLN}.
+
+Se una qualsiasi di queste operazioni fallisce semplicemente la procedura viene bloccata e il canale non viene creato. Si noti anche i canali possono lavorare in parallelo perché ognuno di essi è identificabile tramite il proprio \textbf{channel\_id} \cite{bolt2_peer}.
+
+Verrà ora analizzato il messaggio \textbf{open\_chanel}:
+esso contiene diversi parametri utili a conservare le informazioni e le prospettive che il fondatore del canale ha, e che la controparte può accettare o declinare. Tra i più rilevanti figurano:
+    \begin{itemize}
+        \item \texttt{funding\_satoshis}: l'importo totale che il funder depositerà nel canale.
+        \item \texttt{push\_msat}: un importo opzionale che il funder può regalare immediatamente alla controparte, solitamente è zero.
+        \item \texttt{to\_self\_delay}: il ritardo di sicurezza, espresso in blocchi, richiesto in caso di chiusura unilaterale del canale.
+        \item \texttt{channel\_reserve\_satoshis}: l'importo minimo che ogni parte deve mantenere nel canale per disincentivare comportamenti scorretti \cite{bolt2_peer}.
+    \end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/openChanel.png}
+    \caption[Flusso di apertura di un canale Lightning]{Diagramma di sequenza del protocollo di apertura di un canale. I messaggi vengono scambiati peer-to-peer per negoziare i parametri e scambiare le firme prima della trasmissione on-chain. Fonte: rielaborazione da Antonopoulos \cite{antonopoulos2022masteringLN}.}
+    \label{fig:channel_opening_flow}
+\end{figure}
 
 \section{Aggiornamento dello stato e meccanismi di sicurezza}
+\section{Chiusura del canale}
 \section{Gestione dei nodi offline e ruolo delle watchtower}
 
 %----------------------------------------------------------------------------------------

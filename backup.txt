@@ -418,13 +418,32 @@ Questo passaggio da un modello basato su script a uno basato su \textit{witness 
 Garantendo l'immutabilità del TXID indipendentemente dalle firme, è finalmente possibile costruire reti di canali di pagamento istantanei, sicuri e complessi, ponendo le basi per l'architettura del Lightning Network che verrà analizzata nei capitoli successivi \cite{antonopoulos2017mastering, poon2016lightning}.
 
 \section{Bitcoin come livello base per il Lightning Network}
+In questo capitolo è stato analizzato come le proprietà di Bitcoin garantiscano un sistema sicuro e decentralizzato. Tuttavia, come discusso nel Capitolo 1, la scalabilità on-chain è molto limitata e rende impossibile utilizzare il protocollo su larga scala.
+
+Poon e Dryja \cite{poon2016lightning} propongono quindi una soluzione di secondo livello che non sostituisce Bitcoin, ma va utilizzarlo come livello di \textbf{settlement}, sfruttando la sua blockchain. L'idea alla base è quella di non rendere necessario ai nodi di trasmettere ogni singola transazione sulla blockchain, permettendo ai nodi di scambiarsi fondi sui canali di Lightning Network tutte le volte che vogliono, utilizzando la blockchain solo per aprire il canale, chiuderlo oppure risolvere eventuali dispute.
+
+La blockchain svolge il ruolo di un giudice imparziale in un tribunale: non è necessario rivolgersi ad essa per ogni movimento, è sufficiente avere la matematica garanzia che, in caso di disaccordo, questa possa intervenire ed eseguire il contratto corretto \cite{poon2016lightning}.
+
+La sicurezza dei fondi nel Layer 2 è quindi \textbf{ereditata} direttamente dal Layer 1. I canali di pagamento si ancorano alla blockchain tramite transazioni multisig che bloccano fondi reali, e le transazioni off-chain sono valide solo perchè potrebbero essere trasmesse e confermate dai miner in qualsiasi momento. Con l'introduzione di SegWit, che garantisce l'immutabilità degli ID delle transazioni, questo meccanismo è reso solido \cite{antonopoulos2022masteringLN}.
+
+Nel prossimo capitolo verrà analizzata nel dettaglio l'architettura dei canali di Lightning Network: come vengono aperti, come vengono aggiornati gli stati e come viene garantita la sicurezza senza fiducia nella controparte.
 
 %----------------------------------------------------------------------------------------
 \chapter{Architettura e funzionamento dei canali di pagamento}
 %----------------------------------------------------------------------------------------
-I canali di pagamento permettono a due utenti di scambiarsi fondi più volte senza registrare ogni operazione sulla blockchain.
+L'architettura del Lightning Network nasce con l'obiettivo di combinare la sicurezza crittografica di Bitcoin con la necessità di transazioni istantanee e scalabili. Viene proposto inizialmente nel 2015 ed implementato per la prima nel 2018, ma ad oggi si sta ancora iniziando a vedere quali sono le opportunità che tale sistema offre a Bitcoin, tra cui maggiore privacy, velocità e scalabilità \cite{antonopoulos2022masteringLN}.
+
+Di seguito vengono delineate le caratteristiche distintive che rendono questa rete superiore ai sistemi di pagamento tradizionali e alle transazioni on-chain:
+\begin{itemize}
+    \item Velocità e Finalità immediata: a differenza di Bitcoin, dove è necessario attendere la conferma dei miner, i pagamenti su Lightning Network si concludono in pochi secondi. Una volta scambiate le firme, la transazione è considerata finale e irreversibile tra le parti.
+    \item Privacy e Risparmio di risorse: le transazioni che avvengono off-chain rimangono tra i partecipanti del canale, non vengono trasmesse in broadcast a tutta la rete. Non dovendo essere memorizzate nella blockchain globale richiedono pochissime risorse computazionali e di archiviazione \cite{poon2016lightning}.
+    \item Utilizzo dell'asset nativo: il Lightning Network non impiega token proprietari, ma opera direttamente con Bitcoin, garantendo che l'utente mantenga la custodia dei fondi e la sicurezza crittografica del livello base.
+\end{itemize}
+
+L'intero funzionamento si basa sulla creazione di un contratto intelligente che regola lo scambio di fondi tra due nodi. Nelle sezioni seguenti vedremo come queste proprietà teoriche vengano concretizzate in operazioni crittografiche, partendo dalla creazione di un canale fino alla sua risoluzione \cite{antonopoulos2022masteringLN}.
 
 \section{Apertura, gestione e chiusura di un canale}
+
 \section{Aggiornamento dello stato e meccanismi di sicurezza}
 \section{Gestione dei nodi offline e ruolo delle watchtower}
 

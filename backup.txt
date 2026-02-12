@@ -474,6 +474,35 @@ esso contiene diversi parametri utili a conservare le informazioni e le prospett
 \end{figure}
 
 \section{Aggiornamento dello stato e meccanismi di sicurezza}
+La possibilità di aggiornare lo stato del canale infinite volte, riorganizzando i fondi senza dover interagire con la blockchain, avendo sempre la matematica certezza di poter evitare eventuali truffe, è l'innovazione principale su cui si basa il Lightning Netowork, e che distingue questo meccanismo dai canali di pagamento tradizionali.
+
+Un aggiornamento non comporta lo spostamento di nuovi fondi all'interno del canale, ma consiste in una ridefinizione del bilancio dei fondi inizialmente bloccati nella \textit{Funding Transaction}. I nodi concordano una nuova suddivisione del saldo, generando di conseguenza una nuova coppia di \textit{Commitment Transactions} valide e invalidando lo stato precedente \cite{antonopoulos2022masteringLN}.
+
+Nella Figura \ref{fig:channel_update_flow} è mostrato il diagramma di sequenza per la transizione di stato: i nodi si scambiano le firme per il nuovo impegno e  la chiave di revoca per annullare l'impegno vecchio.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/updateChannel.png}
+    \caption[Diagramma di aggiornamento dello stato]{Diagramma di sequenza del protocollo di aggiornamento dello stato. Lo scambio dei messaggi garantisce che entrambe le parti possiedano una nuova transazione di impegno valida e abbiano revocato la precedente. Fonte: rielaborazione da Antonopoulos \cite{antonopoulos2022masteringLN}.}
+    \label{fig:channel_update_flow}
+\end{figure}
+
+Di seguito viene analizzata la struttura delle transazioni che scambiano le due parti e verranno analizzati i messaggi in Figura \ref{fig:channel_update_flow}
+
+\subsection{Transazioni asimmetriche}
+Durante l'aggiornamento dello stato di un canale, i nodi partecipanti non firmano la medesima transazione, infatti ne vengono generate due versioni differenti, ma speculari. La versione posseduta dal nodo A invia immediatamente i fondi destinati a B, ma blocca con un \textit{timelock} i fondi destinati ad A. Al contrario, la versione posseduta da B blocca i fondi destinati ad esso, ma rende subito disponibili quelli per A \cite{antonopoulos2022masteringLN}.
+
+Tale asimmetria intenzionale serve a disincentivare la chiusura unilaterale del canale, costringendo ad attendere un periodo di predefinito di tempo a chi pubblica la transazione, mentre la controparte riceve i propri fondi subito. Questo meccanismo offre alla parte passiva una finestra temporale per poter rilevare un eventuale tentativo di frode e reagire \cite{poon2016lightning}.
+
+Il messaggio \texttt{commitment\_signed}, che viene inviato prima da A poi da B, contiene la firma che una parte appone sulla versione della \textit{Commitment Transaction} che la controparte detiene, validando quindi il nuovo bilancio dei fondi \cite{bolt2_peer}.
+
+\subsection{Revoca dello stato precedente (RSMC)}
+Come già esposto, è fondamentale in questa procedura garantire che i vecchi stati non possano più essere utilizzati. Una volta che il nuovo stato è stato firmato viene sfruttato un meccanismo chiamato \textbf{Revocable Sequence Maturity Contract}, che permette una invalidazione crittografica degli stati precedenti \cite{poon2016lightning}.
+
+Coma da Figura \ref{fig:channel_update_flow}, il nodo che ha ricevuto la nuova firma risponde con il messaggio \texttt{revoke\_and\_ack}. Questo messaggio contiene la \textit{revocation key}, ossia la chiave di revoca, un segreto crittografico fondamentale relativo allo stato appena passato \cite{bolt2_peer}.
+
+Una volta avvenuto questo scambio, se, per esempio, il nodo A decidesse di pubblicare una vecchia transazione revocata sulla blockchain, la controparte B potrebbe utilizzare la chiave di revoca che gli è stata inviata per penalizzare A secondo i termini definiti nello \textbf{smart contract}. Tipicamente la vittima del tentativo di frode preleva immediatamente tutti i fondi impegnati nel canale, confiscando anche quelli che sarebbero dovuti spettare al truffatore, attraverso una cosiddetta \textit{Penalty Transaction} o \textit{Justice Transaction} \cite{antonopoulos2022masteringLN}.
+
 \section{Chiusura del canale}
 \section{Gestione dei nodi offline e ruolo delle watchtower}
 

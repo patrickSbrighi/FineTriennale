@@ -247,3 +247,12 @@
   howpublished={\url{https://github.com/lightning/bolts/blob/master/08-transport.md}},
   note={Specifica del protocollo di trasporto cifrato basato su Noise Protocol Framework}
 }
+
+@inproceedings{mccorry2018pisa,
+  title={Pisa: Arbitration outsourcing for state channels},
+  author={McCorry, Patrick and Bakshi, Surya and Bentov, Iddo and Meiklejohn, Sarah and Miller, Andrew},
+  booktitle={Proceedings of the 1st ACM Conference on Advances in Financial Technologies},
+  pages={16--30},
+  year={2019},
+  note={Introduce il concetto di Watchtowers e arbitraggio di terze parti per canali off-chain}
+}

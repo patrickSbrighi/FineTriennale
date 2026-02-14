@@ -440,25 +440,24 @@ Di seguito vengono delineate le caratteristiche distintive che rendono questa re
     \item \textbf{Utilizzo dell'asset nativo}: il Lightning Network non impiega token proprietari, ma opera direttamente con Bitcoin, garantendo che l'utente mantenga la custodia dei fondi e la sicurezza crittografica del livello base.
 \end{itemize}
 
-L'intero funzionamento si basa sulla creazione di un contratto intelligente che regola lo scambio di fondi tra due nodi. Nelle sezioni seguenti vedremo come queste proprietà teoriche vengano concretizzate in operazioni crittografiche, partendo dalla creazione di un canale fino alla sua risoluzione \cite{antonopoulos2022masteringLN}.
+L'intero funzionamento si basa sulla creazione di un contratto intelligente, detto \textbf{smart contract}, che regola lo scambio di fondi tra due nodi. Nelle sezioni seguenti verrà detto come queste proprietà teoriche vengano concretizzate in operazioni crittografiche, partendo dalla creazione di un canale fino alla sua risoluzione \cite{antonopoulos2022masteringLN}.
 
 \section{Apertura del canale}
-Prima che due nodi possano aprire un canale, è necessario che stabiliscano una connessione sicura e autenticata a livello di trasporto. I nodi Lightning comunicano su TCP/IP e utilizzano un protocollo crittografico specifico, derivato dal framework \textit{Noise Protocol}, per garantire la riservatezza e l'integrità dei dati scambiati.
+Prima che due nodi possano aprire un canale, è necessario che stabiliscano una connessione sicura a livello di trasporto. I nodi Lightning comunicano tramite TCP/IP e utilizzano un protocollo crittografico specifico, derivato dal framework \textit{Noise Protocol}, per garantire la riservatezza e l'integrità dei dati scambiati.
 
-Durante questa fase, nota come \textit{handshake}, i nodi si scambiano le chiavi pubbliche e generano una chiave di sessione effimera. Solo una volta stabilito questo tunnel cifrato, i peer possono iniziare a scambiare i messaggi definiti nel protocollo BOLT (Basis of Lightning Technology) per la gestione del canale \cite{bolt8_transport}.
+Durante la fase nota come \textit{handshake}, i nodi si scambiano le chiavi pubbliche e generano una chiave di sessione effimera. Solo una volta stabilito questo tunnel cifrato, i peer possono iniziare a scambiare i messaggi definiti nel protocollo BOLT, Basis of Lightning Technology, per la gestione del canale \cite{bolt8_transport}.
 
 Il processo di apertura di un canale di Lightning Network è avviato da uno dei due nodi, definito il \textit{funder}, che intende impegnare i propri fondi nel canale. La procedura segue uno schema preciso volto a garantire che nessuna delle due parti possa perdere i fondi, nemmeno in caso di disconnessione o malfunzionamento della controparte durante il processo \cite{antonopoulos2022masteringLN}.
 
-Come illustrato in Figura \ref{fig:channel_opening_flow}, il protocollo prevede che il fondatore del canale invii un messaggio, chiamato \texttt{open\_channel},  alla controparte, contenente i parametri tecnici ed economici del canale. La controparte, che viene chiamata \textit{fundee}, può scegliere se accettare le condizioni proposte, rispondendo con il messaggio \texttt{accept\_channel}, fornendo la propria chiave pubblica temporanea per il multisig e i propri parametri di sicurezza, oppure rifiutare. 
+Come mostrato in Figura \ref{fig:channel_opening_flow}, il protocollo prevede che il fondatore del canale invii un messaggio, chiamato \texttt{open\_channel},  alla controparte, contenente i parametri tecnici ed economici del canale. La controparte, che viene denominata \textit{fundee}, può scegliere se accettare le condizioni proposte, rispondendo con il messaggio \texttt{accept\_channel}, fornendo la propria chiave pubblica temporanea per il multisig e i propri parametri di sicurezza, oppure rifiutare. 
 
-Nel caso in cui la controparte accettasse, il funder costruisce la \textit{Funding Transaction}, che deposita i fondi nel multisig, ma non la trasmette ancora alla rete Bitcoin. Prima, crea la prima versione della \textit{Commitment Transaction}, la transazione di rimborso, che gli permette di recuperare i fondi in caso di problemi. Invia quindi la firma per la Commitment Transaction della controparte tramite il messaggio \texttt{funding\_created}. Il fundee riceve la firma, verifica la transazione e, a sua volta, invia la propria firma per la Commitment Transaction del funder tramite il messaggio \texttt{funding\_signed} \cite{bolt2_peer}.
+Nel caso in cui la controparte accettasse, il funder costruisce la \textit{Funding Transaction}. Questa transazione ha l'obiettivo di vincolare i fondi su un indirizzo \textit{Multi-Signature 2-of-2} che entrambe le parti controllano, ma non viene ancora trasmessa alla rete Bitcoin. Il funder, prima crea la prima versione della \textit{Commitment Transaction}, la transazione di rimborso, che gli permette di recuperare i fondi in caso di problemi. Invia quindi la firma per la Commitment Transaction della controparte tramite il messaggio \texttt{funding\_created}. Il fundee riceve la firma, verifica la transazione e, a sua volta, invia la propria firma per la Commitment Transaction del funder tramite il messaggio \texttt{funding\_signed} \cite{bolt2_peer}.
 
-Solo dopo aver ricevuto il messaggio \texttt{funding\_signed}, il funder ha la certezza matematica di poter recuperare i propri fondi in caso di mancata cooperazione della controparte. Solo in questo momento trasmette la \textit{Funding Transaction} alla blockchain di Bitcoin. Entrambi i nodi monitorano la blockchain. Quando la Funding Transaction viene confermata, i nodi si scambiano il messaggio \texttt{funding\_locked}. Da questo istante, il canale è considerato attivo e può processare pagamenti off-chain \cite{antonopoulos2022masteringLN}.
+Dopo aver ricevuto quest'ultimo messaggio, il funder ha la certezza matematica di poter recuperare i propri fondi in caso di mancata cooperazione della controparte. Solo in questo momento trasmette la \textit{Funding Transaction} alla blockchain di Bitcoin ed entrambi i nodi la monitorano. Quando la Funding Transaction viene confermata, i nodi si scambiano il messaggio \texttt{funding\_locked}. Da questo istante, il canale è considerato attivo e può processare pagamenti off-chain \cite{antonopoulos2022masteringLN}.
 
-Se una qualsiasi di queste operazioni fallisce semplicemente la procedura viene bloccata e il canale non viene creato. Si noti anche i canali possono lavorare in parallelo perché ognuno di essi è identificabile tramite il proprio \textbf{channel\_id} \cite{bolt2_peer}.
+Se una qualsiasi di queste operazioni fallisce, semplicemente la procedura viene bloccata e il canale non viene creato. Si noti che i canali possono lavorare in parallelo perché ognuno di essi è identificabile tramite il proprio \textbf{channel\_id} \cite{bolt2_peer}.
 
-Verrà ora analizzato il messaggio \textbf{open\_chanel}:
-esso contiene diversi parametri utili a conservare le informazioni e le prospettive che il fondatore del canale ha, e che la controparte può accettare o declinare. Tra i più rilevanti figurano:
+Il messaggio \textbf{open\_chanel} contiene diversi parametri utili a conservare le informazioni e le prospettive che il fondatore del canale ha, e che la controparte può accettare o declinare. Tra i più rilevanti figurano:
     \begin{itemize}
         \item \texttt{funding\_satoshis}: l'importo totale che il funder depositerà nel canale.
         \item \texttt{push\_msat}: un importo opzionale che il funder può regalare immediatamente alla controparte, solitamente è zero.
@@ -478,7 +477,7 @@ La possibilità di aggiornare lo stato del canale infinite volte, riorganizzando
 
 Un aggiornamento non comporta lo spostamento di nuovi fondi all'interno del canale, ma consiste in una ridefinizione del bilancio dei fondi inizialmente bloccati nella \textit{Funding Transaction}. I nodi concordano una nuova suddivisione del saldo, generando di conseguenza una nuova coppia di \textit{Commitment Transactions} valide e invalidando lo stato precedente \cite{antonopoulos2022masteringLN}.
 
-Nella Figura \ref{fig:channel_update_flow} è mostrato il diagramma di sequenza per la transizione di stato: i nodi si scambiano le firme per il nuovo impegno e  la chiave di revoca per annullare l'impegno vecchio.
+Nella Figura \ref{fig:channel_update_flow} è mostrato il diagramma di sequenza per la modifica dello stato: i nodi si scambiano le firme per il nuovo impegno e  la chiave di revoca per annullare l'impegno vecchio.
 
 \begin{figure}[h!]
     \centering
@@ -487,24 +486,83 @@ Nella Figura \ref{fig:channel_update_flow} è mostrato il diagramma di sequenza 
     \label{fig:channel_update_flow}
 \end{figure}
 
-Di seguito viene analizzata la struttura delle transazioni che scambiano le due parti e verranno analizzati i messaggi in Figura \ref{fig:channel_update_flow}
+Di seguito viene analizzata la struttura delle transazioni che si scambiano le due parti e verranno analizzati i messaggi in Figura \ref{fig:channel_update_flow}
 
 \subsection{Transazioni asimmetriche}
-Durante l'aggiornamento dello stato di un canale, i nodi partecipanti non firmano la medesima transazione, infatti ne vengono generate due versioni differenti, ma speculari. La versione posseduta dal nodo A invia immediatamente i fondi destinati a B, ma blocca con un \textit{timelock} i fondi destinati ad A. Al contrario, la versione posseduta da B blocca i fondi destinati ad esso, ma rende subito disponibili quelli per A \cite{antonopoulos2022masteringLN}.
+Durante l'aggiornamento dello stato di un canale, i nodi partecipanti non firmano la medesima transazione, infatti ne vengono generate due versioni differenti, ma speculari. La versione posseduta dal nodo A invia immediatamente i fondi destinati a B, ma blocca con un \textit{timelock} i fondi destinati ad A. Al contrario, la versione posseduta da B blocca i fondi ad esso destinati, ma rende subito disponibili quelli per A \cite{antonopoulos2022masteringLN}.
 
-Tale asimmetria intenzionale serve a disincentivare la chiusura unilaterale del canale, costringendo ad attendere un periodo di predefinito di tempo a chi pubblica la transazione, mentre la controparte riceve i propri fondi subito. Questo meccanismo offre alla parte passiva una finestra temporale per poter rilevare un eventuale tentativo di frode e reagire \cite{poon2016lightning}.
+Tale asimmetria intenzionale serve a disincentivare la chiusura unilaterale del canale, costringendo ad attendere un periodo predefinito di tempo a chi pubblica la transazione, mentre la controparte riceve i propri fondi subito. Questo meccanismo offre alla parte passiva una finestra temporale per poter rilevare un eventuale tentativo di frode e reagire \cite{poon2016lightning}.
 
-Il messaggio \texttt{commitment\_signed}, che viene inviato prima da A poi da B, contiene la firma che una parte appone sulla versione della \textit{Commitment Transaction} che la controparte detiene, validando quindi il nuovo bilancio dei fondi \cite{bolt2_peer}.
+Il messaggio \texttt{commitment\_signed}, che nella Figura \ref{fig:channel_update_flow} viene inviato prima da A poi da B, contiene la firma che una parte appone sulla versione della \textit{Commitment Transaction} che la controparte detiene, validando quindi il nuovo bilancio dei fondi \cite{bolt2_peer}.
 
 \subsection{Revoca dello stato precedente (RSMC)}
 Come già esposto, è fondamentale in questa procedura garantire che i vecchi stati non possano più essere utilizzati. Una volta che il nuovo stato è stato firmato viene sfruttato un meccanismo chiamato \textbf{Revocable Sequence Maturity Contract}, che permette una invalidazione crittografica degli stati precedenti \cite{poon2016lightning}.
 
-Coma da Figura \ref{fig:channel_update_flow}, il nodo che ha ricevuto la nuova firma risponde con il messaggio \texttt{revoke\_and\_ack}. Questo messaggio contiene la \textit{revocation key}, ossia la chiave di revoca, un segreto crittografico fondamentale relativo allo stato appena passato \cite{bolt2_peer}.
+Come da Figura \ref{fig:channel_update_flow}, il nodo che ha ricevuto la nuova firma risponde con il messaggio \texttt{revoke\_and\_ack}. Questo messaggio contiene la \textit{revocation key}, ossia la chiave di revoca, un segreto crittografico fondamentale relativo allo stato appena passato \cite{bolt2_peer}.
 
-Una volta avvenuto questo scambio, se, per esempio, il nodo A decidesse di pubblicare una vecchia transazione revocata sulla blockchain, la controparte B potrebbe utilizzare la chiave di revoca che gli è stata inviata per penalizzare A secondo i termini definiti nello \textbf{smart contract}. Tipicamente la vittima del tentativo di frode preleva immediatamente tutti i fondi impegnati nel canale, confiscando anche quelli che sarebbero dovuti spettare al truffatore, attraverso una cosiddetta \textit{Penalty Transaction} o \textit{Justice Transaction} \cite{antonopoulos2022masteringLN}.
+Una volta avvenuto questo scambio, se, per esempio, il nodo A decidesse di pubblicare una vecchia transazione revocata sulla blockchain, la controparte B potrebbe utilizzare la chiave di revoca che gli è stata inviata per penalizzare A secondo i termini definiti nello \textbf{smart contract} del protocollo. Tipicamente la vittima del tentativo di frode preleva immediatamente tutti i fondi impegnati nel canale, confiscando anche quelli che sarebbero dovuti spettare al truffatore, attraverso una cosiddetta \textit{Penalty Transaction} o \textit{Justice Transaction} \cite{antonopoulos2022masteringLN}.
 
 \section{Chiusura del canale}
+La chiusura rappresenta la fase finale del ciclo di vita di un canale. Come visto precedentemente, la chiusura unilaterale è disincentivata attraverso l'utilizzo dei \textit{timelock}. Esiste infatti un'altra modalità, ritenuta migliore, per chiudere il canale: la modalità cooperativa. Essa infatti permette alle due parti di chiudere il canale cooperando e permettendo loro di ottenere immediatamente i propri fondi, senza dover aspettare \cite{antonopoulos2022masteringLN}.
+
+Di seguito verranno analizzate entrambe le modalità di chiusura.
+
+\subsection{Chiusura cooperativa: Mutual Close}
+La \textbf{chiusura cooperativa}, detta \textbf{Mutual Close}, è la modalità di chiusura che il protocollo favorisce, in quanto immediata, economica e priva di vincoli temporali sui fondi \cite{poon2016lightning}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/closing.png}
+    \caption[Diagramma di chiusura cooperativa]{Diagramma di sequenza della chiusura cooperativa (Mutual Close). Le parti negoziano le commissioni e si scambiano le firme per una transazione finale di chiusura priva di timelock. Fonte: rielaborazione da Antonopoulos \cite{antonopoulos2022masteringLN}.}
+    \label{fig:mutual_close}
+\end{figure}
+
+In Figura \ref{fig:mutual_close} viene mostrato lo scambio di messaggi che avviene tra i due nodi per chiudere il canale in comune accordo. Nello schema rappresentato è il nodo A a voler iniziare la procedura di chiusura. Esso infatti inizia inviando un messaggio di \texttt{shutdown} alla controparte B, contenente il riferimento tramite ID al canale da chiudere e l'indirizzo Bitcoin del wallet al quale vorrebbe che i fondi venissero inviati.
+
+B risponde inviando lo stesso messaggio a sua volta, concordando con la volontà di chiusura di A e specificando il proprio wallet.
+
+Una volta scambiate queste informazioni, le due parti sono pronte per generare la transazione finale che chiude il canale e divide i fondi nella maniera corretta \cite{antonopoulos2022masteringLN}.
+
+Infatti, il \textit{funder} del canale, in questo caso A, invia alla controparte un messaggio denominato \texttt{closing\_signed}, in cui specifica in \textit{satoshi} la \textit{fee} (una sorta di tassa) da pagare per pubblicare la transazione sulla blockchain, e inserisce la propria firma per la multisig 2-of-2 \cite{bolt2_peer}.
+
+Quando B riceve questo messaggio, deve inviarne uno uguale a sua volta, in cui confermare l'importo della \textit{fee}, inserendo lo stesso valore scelto da A e apponendo al messaggio la propria firma, oppure può proporre un nuovo valore per la \textit{fee} semplicemente inviando un valore diverso.
+
+La negoziazione sulla \textit{fee} prosegue fino a che A non riceve indietro da B un messaggio firmato con lo stesso valore in \textit{satoshi}. A questo punto la procedura è finita e il \textit{funder} può pubblicare sulla blockchain la \textbf{Closing Transaction} \cite{antonopoulos2022masteringLN}.
+
+Si noti che questa \textbf{Closing Transaction} è simile all'ultima \textbf{Commitment Transaction} su cui i due nodi erano d'accordo. La differenza sostanziale risiede nel fatto che durante la procedura le due parti collaborano per creare tale transazione, che è uguale per entrambi e che non necessita più dell'utilizzo dei \textit{timelock} per risolvere eventuali frodi \cite{antonopoulos2022masteringLN}.
+
+Per aumentare la sicurezza, il protocollo utilizza un pratica detta \textbf{Up-front Shutdown Script}, che permette di definire l'indirizzo di chiusura già al momento dell'apertura del canale, nei messaggi \texttt{open\_channel} o \texttt{accept\_channel}. Grazie a questa pratica, se un attaccante dovesse compromettere uno dei nodi, non potrebbe in alcun modo chiudere il canale e inviare i fondi a un indirizzo diverso da quello su cui i nodi si erano già accordati. Se l'indirizzo non corrisponde, il protocollo impone alla controparte onesta di rifiutare la chiusura cooperativa \cite{antonopoulos2022masteringLN}.
+
+\subsection{Chiusura unilaterale: Force Close}
+La \textbf{chiusura unilaterale}, o \textit{Force Close}, si verifica quando un nodo decide di chiudere il canale, senza prima avvertire la controparte, pubblicando l'ultimo stato di cui ha possesso sulla blockchain. Questo scenario si verifica nel caso in cui la controparte risultasse offline, smettesse di rispondere, o iniziasse a comportarsi in modo malevolo.
+
+In questa variante, il nodo che forza la chiusura pubblica l'ultima \textbf{Commitment Transaction} valida in suo possesso. Come già discusso nella Sezione 4.2, questa transazione è asimmetrica e comporta delle penalizzazioni per chi la trasmette \cite{poon2016lightning}: infatti i fondi destinati a chi ha avviato la chiusura rimangono bloccati per un periodo definito dal parametro \texttt{to\_self\_delay}, solitamente 144 blocchi. Inoltre le commissioni di mining, ossia le \textit{fee}, sono spesso più alte rispetto alla chiusura presentata precedentemente, perché la transazione risulta più complessa ed occupa più spazio in memoria \cite{antonopoulos2022masteringLN}.
+
+Va infine notato che la chiusura unilaterale è proprio il modo attraverso il quale si può tentare una frode. Se un nodo malevolo non pubblicasse l'ultimo stato valido, ma uno stato precedente con un bilancio per lui più remunerativo, la controparte onesta potrebbe reagire entro la scadenza del \texttt{to\_self\_delay}. In tal caso, la chiusura forzata si trasformerebbe in una \textit{Penalty Transaction}, permettendo alla vittima di confiscare l'intera quantità dei fondi impegnati nel canale grazie al meccanismo di revoca \cite{antonopoulos2022masteringLN}.
+
 \section{Gestione dei nodi offline e ruolo delle watchtower}
+Uno dei requisiti più stringenti del Lightning Network è la necessità che i componenti della rete partecipino attivamente. Nel Lightning Network è fondamentale che un nodo monitori costantemente la blockchain, a differenza dei wallet Bitcoin tradizionali, che possono rimanere offline per lunghi periodi senza rischi per la sicurezza dei fondi. Questo vincolo è noto come \textit{requisito di liveness} \cite{poon2016lightning}.
+
+\subsection{Il problema della liveness}
+Come analizzato nella Sezione 4.2, la sicurezza dei canali di pagamento si basa interamente sulla minaccia di una penalità. Se un nodo disonesto tenta di chiudere il canale pubblicando uno stato precedente e revocato, la vittima ha a disposizione una finestra temporale limitata, definita dal parametro \texttt{to\_self\_delay}, per reagire.
+
+Nell'ipotesi in cui la vittima si trovasse offline a causa di guasti tecnici, problemi di connessione o attacchi mirati, come può essere un attacco DDoS, e non rilevasse la frode entro la scadenza del \textit{timelock}, il vecchio stato pubblicato dal truffatore sulla blockchain verrà confermato, permettendogli di rubare i fondi. Per colpa di questa vulnerabilità risulta rischioso gestire un nodo Lightning su dispositivi mobili o computer non sempre connessi alla rete \cite{antonopoulos2022masteringLN}.
+
+\subsection{Watchtower: outsourcing della sicurezza}
+Per abbassare questo rischio senza costringere ogni utente a mantenere i propri server costantemente attivi, è stato introdotto il concetto di torre di guardia, a cui ci si riferisce con il termine \textbf{Watchtower}. Una Watchtower è un servizio di terze parti che offre la possibilità ad un nodo di delegare il compito di monitorare la blockchain, intervenendo in caso di tentata frode.
+
+Il protocollo, definito inizialmente nel paper "Pisa" da McCorry, permette di effettuare questo \textit{outsourcing} preservando completamente la privacy dell'utente. Infatti, a meno che non si verifichi una frode, non è necessario che la torre sia a conoscenza dell'identità delle parti che hanno definito lo \textit{smart contract}, tanto meno della quantità di fondi impiegati nel canale e del contenuto delle transazioni \cite{mccorry2018pisa}.
+
+Il funzionamento si basa sull'invio di dati parziali e cifrati. Ogni volta che i nodi aggiornano lo stato del canale, il client invia alla Watchtower un pacchetto dati composto da due elementi \cite{antonopoulos2022masteringLN}:
+\begin{itemize}
+\item \textbf{Hint:} I primi 16 byte del TXID della transazione di impegno. Questo serve alla torre per scansionare la blockchain e riconoscere se una specifica transazione viene pubblicata, senza però rivelare l'intera transazione a priori.
+\item \textbf{Encrypted Blob:} Un payload cifrato che contiene la firma della \textit{Justice Transaction} e la chiave di revoca necessaria per spostare i fondi.
+\end{itemize}
+
+La torre memorizza questi dati in un database ma non può decifrare il \textit{blob} finché non trova una corrispondenza con l'\textit{hint} sulla blockchain.
+Se la torre rileva che la controparte ha pubblicato uno stato revocato, può utilizzare i dati della transazione malevola stessa per derivare la chiave di decifratura. A quel punto, la torre decifra il blob, costruisce la transazione di penalità e la trasmette alla rete, inviando i fondi al wallet sicuro dell'utente offline e trattenendo una piccola percentuale come ricompensa per il servizio svolto \cite{mccorry2018pisa}.
+
+Grazie a questo meccanismo, la sicurezza del canale è garantita anche se l'utente è offline, disincentivando i tentativi di frode poiché l'attaccante non può sapere se la vittima sta utilizzando una o più Watchtower per sorvegliare il canale.
 
 %----------------------------------------------------------------------------------------
 \chapter{Dal singolo canale di pagamento alla rete Lightning}

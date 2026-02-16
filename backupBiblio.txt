@@ -283,3 +283,303 @@
   year={2018},
   note={Definizione formale di atomicità nei protocolli basati su hash-lock}
 }
+
+@misc{bolt7_routing,
+  title={BOLT \#7: P2P Node and Channel Discovery},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/07-routing-gossip.md}},
+  note={Definizione dei messaggi di annuncio e aggiornamento dei canali}
+}@misc{nakamoto2008bitcoin,
+  title={Bitcoin: A Peer-to-Peer Electronic Cash System},
+  author={Nakamoto, Satoshi},
+  year={2008},
+  url={https://bitcoin.org/bitcoin.pdf},
+  note={Whitepaper disponibile su bitcoin.org}
+}
+
+@misc{poon2016lightning,
+  title={The Bitcoin Lightning Network: Scalable Off-Chain Instant Payments},
+  author={Poon, Joseph and Dryja, Thaddeus},
+  year={2016},
+  month={January},
+  note={DRAFT Version 0.5.9.2},
+  url={https://lightning.network/lightning-network-paper.pdf}
+}
+
+@article{narayanan2017bitcoin,
+  title={Bitcoin's academic pedigree},
+  author={Narayanan, Arvind and Clark, Jeremy},
+  journal={Communications of the ACM},
+  volume={60},
+  number={12},
+  pages={36--45},
+  year={2017},
+  publisher={ACM New York, NY, USA}
+}
+
+@incollection{alston2021constitutions,
+  author      = {Alston, Eric},
+  title       = {Constitutions and Blockchains: Competitive Governance of Fundamental Rulesets},
+  booktitle   = {Handbook on Blockchain and Cryptocurrencies},
+  editor      = {Caton, James},
+  publisher   = {Routledge},
+  year        = {2021},
+  note        = {Original work published 2019},
+  url         = {https://ssrn.com/abstract=3358434}
+}
+
+@misc{buterin2021trilemma,
+  title={Why Sharding is Great: Demystifying the Scalability Trilemma},
+  author={Buterin, Vitalik},
+  year={2021},
+  month={April},
+  howpublished={\url{https://vitalik.eth.limo/general/2021/04/07/sharding.html}},
+  note={Accesso: 30 Gennaio 2025}
+}
+
+@book{stallings2017cryptography,
+  title={Cryptography and Network Security: Principles and Practice},
+  author={Stallings, William},
+  year={2017},
+  publisher={Pearson},
+  edition={7th}
+}
+
+@book{antonopoulos2017mastering,
+  title={Mastering Bitcoin: Programming the Open Blockchain},
+  author={Antonopoulos, Andreas M},
+  year={2017},
+  publisher={O'Reilly Media},
+  edition={2nd}
+}
+
+@book{schneier1996applied,
+  title={Applied Cryptography: Protocols, Algorithms, and Source Code in C},
+  author={Schneier, Bruce},
+  year={1996},
+  publisher={John Wiley \& Sons}
+}
+
+@techreport{sec2_2010,
+  title={SEC 2: Recommended Elliptic Curve Domain Parameters},
+  author={{Certicom Research}},
+  year={2010},
+  institution={Standards for Efficient Cryptography Group (SECG)},
+  note={Version 2.0},
+  url={https://www.secg.org/sec2-v2.pdf}
+}
+
+@misc{bip65,
+  title={BIP 65: OP\_CHECKLOCKTIMEVERIFY},
+  author={Todd, Peter},
+  year={2014},
+  howpublished={\url{https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki}},
+  note={Standard per timelock assoluti}
+}
+
+@misc{bip112,
+  title={BIP 112: CHECKSEQUENCEVERIFY},
+  author={Friedenbach, Mark and BtcDrak and Lombrozo, Eric},
+  year={2015},
+  howpublished={\url{https://github.com/bitcoin/bips/blob/master/bip-0112.mediawiki}},
+  note={Standard per timelock relativi}
+}
+
+@phdthesis{conoscenti2019payment,
+  author      = {Conoscenti, Marco},
+  title       = {Capabilities and Limitations of Payment Channel Networks for Blockchain Scalability},
+  school      = {Politecnico di Torino},
+  year        = {2019},
+  address     = {Torino, Italia},
+  keywords    = {Lightning Network, payment channels, blockchain scalability, HTLC},
+  url         = {https://hdl.handle.net/20.500.14242/125486},
+  note        = {Tesi di dottorato, accesso aperto}
+}
+
+@inproceedings{chaum1983blind,
+  author    = {Chaum, David},
+  title     = {Blind Signatures for Untraceable Payments},
+  booktitle = {Advances in Cryptology},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages     = {199--203},
+  year      = {1983}
+}
+
+@misc{bitcoin_dev_blockchain,
+  title = {Blockchain --- Bitcoin Developer Reference},
+  author = {{Bitcoin Developers}},
+  year = {2025},
+  url = {https://developer.bitcoin.org/devguide/block_chain.html},
+  note = {Consultato il 23 ottobre 2025}
+}
+
+@misc{bolt1_protocol,
+  title={BOLT \#1: Base Protocol},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/01-protocol.md}},
+  note={Specifica tecnica del protocollo Lightning Network, v1.0}
+}
+
+@misc{provino_merkle,
+  author = {Provino, Andrea},
+  title  = {Merkle Tree e Blockchain},
+  year   = {2020},
+  url    = {https://www.andreaprovino.it/merkle-tree},
+  note   = {Consultato il 23 ottobre 2025}
+}
+
+@book{antonopoulos2022masteringLN,
+  title={Mastering the Lightning Network: A Second Layer Blockchain Protocol for Instant Bitcoin Payments},
+  author={Antonopoulos, Andreas M. and Osuntokun, Olaoluwa and Pickhardt, Rene},
+  year={2022},
+  publisher={O'Reilly Media},
+  edition={1st},
+  note={Fondamentale per l'architettura dei canali e degli HTLC}
+}
+
+@misc{lightspark2025powpos,
+  title={Proof of Work and Proof of Stake: The Architects of Digital Trust},
+  author={{Lightspark}},
+  year={2025},
+  howpublished={\url{https://www.lightspark.com/glossary/proof-of-work-and-proof-of-stake}},
+  note={Consultato il 9 febbraio 2026}
+}
+
+@article{modelchecking2025security,
+  title={Model Checking the Security of the Lightning Network},
+  author={Siddharth, T. and others},
+  journal={arXiv preprint},
+  year={2025},
+  note={Ottimo per l'analisi formale della sicurezza nel Capitolo 6}
+}
+
+@misc{bitcoinwiki_genesis,
+  title = {Genesis block},
+  author = {{Bitcoin Wiki Contributors}},
+  year = {2024},
+  howpublished = {\url{https://en.bitcoin.it/wiki/Genesis_block}},
+  note = {Accesso: 9 Febbraio 2026. Fondamentale per i parametri tecnici iniziali della PoW}
+}
+
+@misc{tse2022_lecture15_pos,
+  author = {Tse, David},
+  title = {Lecture 15: From proof-of-work to proof-of-stake},
+  year = {2022},
+  howpublished = {EE 374: Blockchain Foundations, Stanford University},
+  note = {Analisi della transizione dai modelli PoW a protocolli di consenso energeticamente efficienti}
+}
+
+@article{kufeoglu2019_energy_consumption_bitcoin,
+  author = {K{\"u}feo{\u{g}}lu, Sinan and {\"O}zkuran, Mahmut},
+  title = {Energy consumption of bitcoin mining},
+  year = {2019},
+  note = {Studio di riferimento per l'impatto ambientale e il dispendio elettrico del mining}
+}
+
+@techreport{hash_intro_paper,
+  author      = {Miller, Spencer},
+  title       = {MMH32 from Scratch: An Introduction to Hash Functions},
+  institution = {University of Chicago},
+  year        = {2017},
+  note        = {REU Program in Mathematics},
+  url         = {http://math.uchicago.edu/~may/REU2017/REUPapers/Miller,Spencer.pdf}
+}
+
+@article{mining_tech_paper,
+  author  = {Courtois, Nicolas T. and Grajek, Marek and Naik, Rahul},
+  title   = {The Unreasonable Fundamental Incertitudes Behind Bitcoin Mining},
+  journal = {arXiv preprint arXiv:1310.7935},
+  year    = {2014},
+  url     = {https://arxiv.org/abs/1310.7935}
+}
+
+@techreport{pow_critique_paper,
+  author      = {K{\"u}feo{\u{g}}lu, Sinan and {\"O}zkuran, Mahmut},
+  title       = {Energy Consumption of Bitcoin Mining},
+  institution = {University of Cambridge, Faculty of Economics},
+  year        = {2019},
+  type        = {Cambridge Working Papers in Economics},
+  number      = {1948},
+  url         = {https://www.econ.cam.ac.uk/research-files/repec/cam/pdf/cwpe1948.pdf}
+}
+
+@misc{bip141,
+  title        = {BIP 141: Segregated Witness (Consensus Layer)},
+  author       = {Lombrozo, Eric and Lau, Johnson and Wuille, Pieter},
+  year         = {2015},
+  howpublished = {\url{https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki}},
+  note         = {Specifica tecnica fondamentale per la risoluzione della malleabilità}
+}
+
+@inproceedings{decker2015fast,
+  title        = {A fast and scalable payment network with bitcoin duplex micropayments},
+  author       = {Decker, Christian and Wattenhofer, Roger},
+  booktitle    = {International Conference on Networked Systems},
+  pages        = {3--12},
+  year         = {2015},
+  organization = {IEEE},
+  note         = {Analisi fondamentale sulla malleabilità e i canali di pagamento}
+}
+
+@misc{bolt2_peer,
+  title={BOLT \#2: Peer Protocol for Channel Management},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/02-peer-protocol.md}},
+  note={Specifica dei messaggi di apertura, aggiornamento e chiusura dei canali}
+}
+
+@misc{bolt8_transport,
+  title={BOLT \#8: Encrypted and Authenticated Transport},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/08-transport.md}},
+  note={Specifica del protocollo di trasporto cifrato basato su Noise Protocol Framework}
+}
+
+@inproceedings{mccorry2018pisa,
+  title={Pisa: Arbitration outsourcing for state channels},
+  author={McCorry, Patrick and Bakshi, Surya and Bentov, Iddo and Meiklejohn, Sarah and Miller, Andrew},
+  booktitle={Proceedings of the 1st ACM Conference on Advances in Financial Technologies},
+  pages={16--30},
+  year={2019},
+  note={Introduce il concetto di Watchtowers e arbitraggio di terze parti per canali off-chain}
+}
+
+@misc{bolt4_onion,
+  title={BOLT \#4: Onion Routing Protocol},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/04-onion-routing.md}},
+  note={Specifica del formato dei pacchetti di routing}
+}
+
+@inproceedings{danezis2009sphinx,
+  title={Sphinx: A compact and provably secure mix format},
+  author={Danezis, George and Goldberg, Ian},
+  booktitle={2009 IEEE Symposium on Security and Privacy},
+  pages={269--282},
+  year={2009},
+  organization={IEEE},
+  note={Base crittografica per l'Onion Routing in LN}
+}
+
+@inproceedings{herlihy2018atomic,
+  title={Atomic cross-chain swaps},
+  author={Herlihy, Maurice},
+  booktitle={Proceedings of the 2018 ACM symposium on principles of distributed computing},
+  pages={245--254},
+  year={2018},
+  note={Definizione formale di atomicità nei protocolli basati su hash-lock}
+}
+
+@misc{bolt7_routing,
+  title={BOLT \#7: P2P Node and Channel Discovery},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/07-routing-gossip.md}},
+  note={Definizione dei messaggi di annuncio e aggiornamento dei canali}
+}

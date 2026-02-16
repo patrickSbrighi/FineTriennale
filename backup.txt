@@ -124,7 +124,7 @@ Il funzionamento logico di base di questo meccanismo è il seguente:
 \begin{enumerate}
     \item \textbf{Apertura:} Due nodi bloccano una somma di denaro comune in una transazione sulla blockchain. Questo è l'unico momento in cui la rete globale viene coinvolta inizialmente. Questa transazione di apertura viene chiamata \textit{Funding Transaction}.
     \item \textbf{Operatività Off-Chain:} Le parti possono scambiarsi un numero illimitato di transazioni aggiornando privatamente la ripartizione dei fondi bloccati. Queste operazioni sono istantanee e non richiedono commissioni di mining, poiché sono semplici scambi di dati firmati crittograficamente tra i due utenti.
-    \item \textbf{Chiusura:} Quando le parti decidono di terminare la collaborazione, l'ultimo stato del bilancio viene inviato alla blockchain per la transazione finale. Non è necessario che entrambe i nodi richiedano di chiudere il canale, basta solo una delle due parti.
+    \item \textbf{Chiusura:} Quando le parti decidono di terminare la collaborazione, l'ultimo stato del bilancio viene inviato alla blockchain per la transazione finale. Non è necessario che entrambi i nodi richiedano di chiudere il canale, basta solo una delle due parti.
 \end{enumerate}
 
 In questo modello, la blockchain non agisce più come un registro contabile di ogni singola transazione, ma assume il ruolo di un giudice imparziale che interviene solo in caso di disputa o alla fine del rapporto economico tra le parti.
@@ -160,7 +160,7 @@ Ognuna di queste caratteristiche è essenziale per rendere la funzione crittogra
 La famiglia di funzioni crittografiche di hash più utilizzata ad oggi è la \textbf{SHA}, \textit{Secure Hash Algorithm}, i vari algoritmi che ne fanno parte si distinguono per differenza di lunghezza del \textit{digest} e resistenza alle collisioni:
 \begin{itemize}
     \item \textbf{SHA-1} $\rightarrow$ è stato l'algoritmo più usato della famiglia sha, diffuso in numerose applicazioni e protocolli nonostante ormai sia considerato insicuro, dato che la sua sicurezza è stata compromessa dai crittoanalisti. Produce un \textit{digest} di 160 bit, da un input lungo massimo $2^{64}-1$ bit.
-    \item \textbf{SHA-2} $\rightarrow$ Nel 2001 vengono pubblicate dal NIST altre quattro funzioni di hash, ognuna con un \textit{digest} più lungo di quello originale. A far parte di questo sottogruppo sono \textbf{SHA-224}, \textbf{SHA-256}, \textbf{SHA-384} e \textbf{SHA-512}, che generano \textit{digest} rispettivamente di 224, 256, 384 e 512 bit. Gli algoritmi \textbf{SHA-256} e \textbf{SHA-512} lavorano rispettivamente con \textit{word} di 32 e 64 bit. La loro struttura è sostanzialmente identica anche se utilizzano un differente numero di rotazioni e di costanti addizionali. Gli altri due algoritmi, invece, sono semplicemente delle versioni troncate di questi, con hash calcolati con differenti valori iniziali. La sicurezza della famiglia SHA-2 è oggi considerata solida; tuttavia, la sua struttura è stata meno analizzata rispetto a SHA-1 prima della sua compromissione, motivo per cui il NIST ha promosso lo sviluppo di SHA-3.
+    \item \textbf{SHA-2} $\rightarrow$ Nei primi anni 2000 vengono pubblicate dal NIST altre quattro funzioni di hash, ognuna con un \textit{digest} più lungo di quello originale. A far parte di questo sottogruppo sono \textbf{SHA-224}, \textbf{SHA-256}, \textbf{SHA-384} e \textbf{SHA-512}, che generano \textit{digest} rispettivamente di 224, 256, 384 e 512 bit. Gli algoritmi \textbf{SHA-256} e \textbf{SHA-512} lavorano rispettivamente con \textit{word} di 32 e 64 bit. La loro struttura è sostanzialmente identica anche se utilizzano un differente numero di rotazioni e di costanti addizionali. Gli altri due algoritmi, invece, sono semplicemente delle versioni troncate di questi, con hash calcolati con differenti valori iniziali. La sicurezza della famiglia SHA-2 è oggi considerata solida; tuttavia, la sua struttura è stata meno analizzata rispetto a SHA-1 prima della sua compromissione, motivo per cui il NIST ha promosso lo sviluppo di SHA-3.
     \item \textbf{SHA-3} $\rightarrow$ Nuovo membro della famiglia SHA trovato grazie ad un competizione lanciata dal NIST nel 2007, con l'obiettivo di sviluppare una nuova funzione di hashing per rafforzare le versioni precedenti.
 \end{itemize} \cite{stallings2017cryptography}
 
@@ -234,7 +234,7 @@ Diventa quindi necessario gestire il tempo all'interno delle transazioni. Quest'
 
 Entrano quindi in gioco i \textbf{timelock}. Ne esistono due tipi:
 \begin{itemize}
-    \item \textbf{Timelock assoluti:} rendono l'output di una transazione spendibile solo dopo un determinato punto nel futuro, ad esempio dopo il blocco 850.000.
+    \item \textbf{Timelock assoluti:} rendono una transazione non valida per la rete fino ad un determinato punto nel futuro, ad esempio fino al blocco 850.000.
     A livello di script, questi sono implementati tramite l'opcode \textbf{\texttt{OP\_CHECKLOCKTIMEVERIFY}} (CLTV), introdotto con il BIP 65 \cite{bip65}.
     Questi vengono utilizzati per i \textbf{rimborsi}. Come detto precedentemente, quando due nodi aprono un canale bloccano dei fondi con la \textit{Funding Transaction}, questa rende tali fondi comuni ed impone la necessità della firma di entrambe le parti per fare un qualsiasi movimento. Se un nodo, una volta creato il canale, smette di rispondere, o va offline perennemente, l'altro, dopo un determinato periodo, può recuperare i fondi che aveva bloccato grazie a una transazione che diviene valida solo allo scadere del timelock. \cite{antonopoulos2017mastering}
     \item \textbf{Timelock relativi:} introdotti con il BIP 112 \cite{bip112} tramite l'opcode \textbf{\texttt{OP\_CHECKSEQUENCEVERIFY}} (CSV), essi non guardano una data fissa nel calendario, ma l'età dell'output che si sta spendendo. Questo tipo di timelock impone la seguente condizione: una transazione $X$ che spende un output $Y$ è valida se e solo se sono passati $n$ blocchi dalla conferma di $Y$ sulla blockchain.
@@ -349,7 +349,7 @@ La struttura dei blocchi e la loro concatenazione tramite Proof-of-Work fornisco
 \section{Proof-of-Work: meccanismo di consenso e arbitraggio}
 Nel protocollo originiale di Nakamoto \cite{nakamoto2008bitcoin}, la \textbf{Proof of Work} è il meccanismo adottato per garantire la sicurezza dalla rete, impedire il \textit{double spending} e confermare le transazioni attraverso un processo di competizione tra i miner che richiede un enorme potenza di calcolo e di energia. La funzione principale della PoW è quindi quella di rendere estremamente costoso e impraticabile per un malintenzionato manomettere la rete.
 
-Per il lighting network questo meccanismo è fondamentale perché garantisce sicurezza e veridicità sulla blockchain, e la rende immutabile. Inoltre tale sistema viene anche utilizzato come orologio centrale, dato che esso genera un blocco ogni dieci minuti. \cite{antonopoulos2022masteringLN}
+Per il Lighting nNetwork questo meccanismo è fondamentale perché garantisce sicurezza e veridicità sulla blockchain, e la rende immutabile. Inoltre tale sistema viene anche utilizzato come orologio centrale, dato che esso genera un blocco ogni dieci minuti. \cite{antonopoulos2022masteringLN}
 
 I \textbf{miner} sono computer, tipicamente dotati di molta potenza, che convalidano le transazioni risolvendo i vari blocchi ed aggiungendoli alla blockchain. Per fare ciò competono per risolvere problemi crittografici complessi e colui che risolve il problema per primo viene ricompensato con nuove unità di Bitcoin. \cite{mining_tech_paper}
 
@@ -451,9 +451,9 @@ Il processo di apertura di un canale di Lightning Network è avviato da uno dei 
 
 Come mostrato in Figura \ref{fig:channel_opening_flow}, il protocollo prevede che il fondatore del canale invii un messaggio, chiamato \texttt{open\_channel},  alla controparte, contenente i parametri tecnici ed economici del canale. La controparte, che viene denominata \textit{fundee}, può scegliere se accettare le condizioni proposte, rispondendo con il messaggio \texttt{accept\_channel}, fornendo la propria chiave pubblica temporanea per il multisig e i propri parametri di sicurezza, oppure rifiutare. 
 
-Nel caso in cui la controparte accettasse, il funder costruisce la \textit{Funding Transaction}. Questa transazione ha l'obiettivo di vincolare i fondi su un indirizzo \textit{Multi-Signature 2-of-2} che entrambe le parti controllano, ma non viene ancora trasmessa alla rete Bitcoin. Il funder, prima crea la prima versione della \textit{Commitment Transaction}, la transazione di rimborso, che gli permette di recuperare i fondi in caso di problemi. Invia quindi la firma per la Commitment Transaction della controparte tramite il messaggio \texttt{funding\_created}. Il fundee riceve la firma, verifica la transazione e, a sua volta, invia la propria firma per la Commitment Transaction del funder tramite il messaggio \texttt{funding\_signed} \cite{bolt2_peer}.
+Nel caso in cui la controparte accettasse, il funder costruisce la \textit{Funding Transaction}. Questa transazione ha l'obiettivo di vincolare i fondi su un indirizzo \textit{Multi-Signature 2-of-2} che entrambe le parti controllano. È fondamentale che tale transazione non venga trasmessa subito sulla blockchain, il funder, infatti, crea la prima versione della \textit{Commitment Transaction}, la transazione di rimborso, che gli permette di recuperare i fondi in caso di problemi. Invia quindi la firma per la Commitment Transaction della controparte tramite il messaggio \texttt{funding\_created}. Il fundee riceve la firma, verifica la transazione e, a sua volta, invia la propria firma per la Commitment Transaction del funder tramite il messaggio \texttt{funding\_signed} \cite{bolt2_peer}.
 
-Dopo aver ricevuto quest'ultimo messaggio, il funder ha la certezza matematica di poter recuperare i propri fondi in caso di mancata cooperazione della controparte. Solo in questo momento trasmette la \textit{Funding Transaction} alla blockchain di Bitcoin ed entrambi i nodi la monitorano. Quando la Funding Transaction viene confermata, i nodi si scambiano il messaggio \texttt{funding\_locked}. Da questo istante, il canale è considerato attivo e può processare pagamenti off-chain \cite{antonopoulos2022masteringLN}.
+Dopo aver ricevuto quest'ultimo messaggio, il funder ha la certezza matematica di poter recuperare i propri fondi in caso di mancata cooperazione della controparte. Solo in questo momento trasmette la \textit{Funding Transaction} alla blockchain di Bitcoin. Se la \textit{Funding Transaction} fosse stata elaborata dalla blockchain prima della creazione della \textit{Commitment Transaction} e il procedimento si fosse blocato, i fondi sarebbe andati perduti. Successivamente entrambi i nodi monitorano la blockchain e quando la Funding Transaction viene confermata, i nodi si scambiano il messaggio \texttt{funding\_locked}. Da questo istante, il canale è considerato attivo e può processare pagamenti off-chain \cite{antonopoulos2022masteringLN}.
 
 Se una qualsiasi di queste operazioni fallisce, semplicemente la procedura viene bloccata e il canale non viene creato. Si noti che i canali possono lavorare in parallelo perché ognuno di essi è identificabile tramite il proprio \textbf{channel\_id} \cite{bolt2_peer}.
 
@@ -645,8 +645,71 @@ Di fatti, se il contratto tra $A$ e $B$ scadesse nello stesso esatto momento di 
 Se queste regole vengono rispettate e tutti i partecipanti alla catena collaborano correttamente, si ha la certezza che ogni operazione venga portata a termine e non accada nulla di spiacevole. Se invece per un qualsiasi motivo un nodo smettesse di collaborare, sarò proprio esso ad ottenere la conseguenza peggiore. Infatti se, in una situazione ideale in cui i timelock sono stati utilizzati nel modo giusto, $B$ decidesse di smettere di collaborare dopo aver generato il contratto con $C$, quest'ultimo otterrebbe i propri fondi con il segreto $s$, $A$ verrebbe rimborsato allo scadere del timelock, e $B$ rimarrebbe l'unico nodo ad aver perso i fondi \cite{herlihy2018atomic}.
 
 \section{Routing dei pagamenti e diffusione delle informazioni}
-\section{Aspetti di privacy nel Lightning Network}
+Come anticipato, il Lightning Network utilizza un protocollo di routing per permettere ai pagamenti di arrivare a destinazione passando attraverso altri nodi appartenenti alla rete. Per sapere come instradarli è necessario che ogni nodo abbia una propria mappa della rete e sia a conoscenza dei nodi e dei canali attraversabili \cite{antonopoulos2022masteringLN}.
 
+\subsection{Protocollo di Gossip}
+Per fare ciò viene utilizzato un \textbf{protocollo di gossip} che permette di scoprire i collegamenti e i nodi della rete attraverso due messaggi: il \texttt{node\_announcement} e lo \texttt{channel\_announcement}.
+
+Attraverso il messaggio \texttt{node\_announcement} i nodi si annunciano alla rete inviando in broadcast ID, host e port, in modo tale da permettere agli altri di stabilire delle connessioni con lui. Ogni nodo può inviare più messaggi di questa tipologia per comunicare eventuali aggiornamenti delle informazioni.
+
+Il messaggio \texttt{channel\_announcement}, invece, comunica alla rete la creazione di un canale tra due nodi e permette implicitamente ad ogni nodo di generarsi una propria mappa della topologia della rete, così facendo essi saranno in grado di generare il percorso di instradamento per i pagamenti \cite{bolt7_routing}.
+
+L'annuncio di un canale è un meccanismo complicato perché fondamentale per il routing. Infatti se la rete venisse inondata di annunci di canali falsi sarebbe impossibile per i nodi capire quale percorso fare seguire ai propri pagamenti. A differenza del messaggio per annunciare i nodi, lo \texttt{channel\_announcement} per un determinato canale può essere propagato solamente una volta. Esiste poi un messaggio specifico per l'aggiornamento delle informazioni, ossia lo \texttt{channel\_update}, che svolge anche un ruolo fondamentale nella verifica dell'effettiva esistenza del canale annunciato.
+
+Infatti, per provare l'esistenza di un canale, è necessario:
+\begin{enumerate}
+    \item dimostrare l'esistenza di una \textit{Funding Transaction} nella blockchain tra i due nodi.
+    \item il nodo 1 e il nodo 2 devono condividere le firme digitali in grado di dimostrare il possedimento delle chiavi private dei bitcoin bloccati nella transazione e le chiavi private dei nodi che annunciano il canale.
+\end{enumerate}
+
+Per dimostrare le ultime due condizioni, i nodi inviano le altre informazioni tramite il messaggio \texttt{channel\_update}. Di conseguenza per dimostrare l'esistenza di un canale è necessario uno e un solo messaggio \texttt{channel\_announcement} e due messaggi \texttt{channel\_update}, uno per nodo \cite{bolt7_routing}.
+
+\subsection{Instradamento e selezione del percorso}
+Prima di trattare la selezione del percorso, detta \textbf{pathfinding} è necessario fare una precisazione: il \textit{pathfinding} e il \textit{routing} sono due concetti separati.
+Il primo si occupa di scegliere il percorso in grado di connettere il mittente con il destinatario, esaminando la mappa che il mittente si è generato. Il secondo, invece, si riferisce alla seria di interazione che avvengono durante il percorso predeterminato da un nodo $A$ ad un nodo $B$ \cite{antonopoulos2022masteringLN}.
+
+A differenza dei protocolli di routing classici, come il protocollo IP, dove ogni router decide autonomamente qual è il passo successivo da compiere, il Lightning Network adotta un approccio basato sul \textbf{Source Routing}.
+
+In questo modello è il mittente a calcolare l'intero percorso, in base alla mappa della topologia della rete che si è costruito grazie al \textit{protocollo di gossip}, prima di inviare il primo pacchetto.
+Tale architettura risolve il problema della privacy, impedendo ai nodi intermedi di conoscere l'intera rotta e il mittente e destinatario del pagamento \cite{antonopoulos2022masteringLN}.
+
+Per scegliere il percorso migliore, il mittente trasforma la mappa in un grafo pesato, ed applica i classici algoritmi di ricerca del cammino minimo, come ad esempio \textit{Dijkstra}. Gli aspetti che vengono valutati per trovare il percorso ottimale sono i seguenti:
+\begin{itemize}
+\item \textbf{Fees:} Ogni canale prende una tariffa base e una percentuale sull'importo transato. Dunque vengono preferiti i percorsi più economici.
+\item \textbf{Ritardo temporale:} Ogni salto, detto \textbf{hop}, allunga i tempi di consegna. Scegliere percorsi troppo lunghi comporta tempi di attesa maggiori.
+\item \textbf{Capacità del canale:} Vengono esclusi a priori i canali la cui capacità totale, che è pubblicata sulla blockchain, è inferiore all'importo del pagamento.
+\end{itemize}
+
+Quest'ultimo punto introduce la sfida dell'\textbf{incertezza della liquidità}, che il Lightning Network deve risolvere. Come detto, la capacità totale di un canale è un dato pubblico, ma la distribuzione attuale dei fondi al suo interno è un'informazione privata. Il mittente, quando calcola la rotta, non ha la certezza che un nodo abbia abbastanza liquidità dalla sua parte per inoltrare il pagamento. Questo rende \textit{probabilistico} il processo di pathfinding. La probabilità di successo di un percorso viene stimata, e nel caso in cui esso fallisca, il mittente riceve un messaggio d'errore e calcola un percorso alternativo, evitando il nodo che ha generato il problema \cite{antonopoulos2022masteringLN}.
+
+\subsection{Onion Routing e Sicurezza}
+Una volta che è stato calcolato il percorso ottimale per il routing, il mittente deve costruire il pacchetto di pagamento in modo tale da garantire la privacy e l'integrità dei dati. Tale pacchetto non può essere trasmesso in chiaro durante il percorso, perché ogni nodo intermedio verrebbe a conoscenza dell'identità del mittente e del beneficiario e dell'importo totale del pagamento, così facendo verrebbe compromessa la privacy e la sicurezza della rete.
+
+Il Lightning Network, per risolvere questo problema, implementa un protocollo basato sulla costruzione di pacchetti \textit{Sphinx}. Originariamente proposto da Danezis e Goldberg nel 2009 come formato compatto e sicuro per reti di mixaggio \cite{danezis2009sphinx}, è stato adattato come protocollo per il routing del Lightning Network e chiamato \textbf{Onion Routing} \cite{bolt4_onion}.
+
+Alla base di \textit{Sphinx} c'è il concetto di crittografia a strati. I dati di routing vengono avvolti progressivamente, iniziando dall'ultimo nodo del percorso fino ad arrivare al primo. Ogni nodo intermedio utilizza la propria chiave privata per decifrare esclusivamente lo strato più esterno a lui destinato, senza poter sbirciare gli altri strati. In questo modo ad ogni nodo vengono rivelate solamente le informazioni strettamente necessarie per quel salto. Tali informazioni sono:
+\begin{itemize}
+    \item L'identità del nodo successivo a cui inoltrare il pacchetto, ossia il \textit{Next Hop}.
+    \item La scadenza del timelock e l'importo da inoltrare.
+    \item Un codice di autenticazione, utile per verificare che il pacchetto non sia stato manomesso.
+\end{itemize}
+
+Una proprietà fondamentale, che permette ai pacchetti Sphinx di mantenere privacy e sicurezza, è che hanno una \textbf{dimensione fissa}. Ad ogni passaggio, il pacchetto mantiene la sua lunghezza in byte costante. In questo modo, un osservatore esterno oppure un nodo malevolo, non è in grado di dedurre la posizione del nodo corrente all'interno del percorso, o non può calcolare la lunghezza totale del tragitto basandosi sulla dimensione dei dati \cite{antonopoulos2022masteringLN}.
+Ogni nodo conosce quindi solo il proprio predecessore e il proprio successore, ignorando completamente l'origine e la destinazione finale del pagamento.
+
+\subsubsection{Fairness Protocol}
+Come detto al Capitolo 1, l'innovazione principale portata da Bitcoin è l'utilizzo di primitive crittografiche per sostituire la fiducia negli intermediari con la fiducia in un protocollo verificabile. Il Lightning Network estende proprio questo concetto \cite{antonopoulos2022masteringLN}.
+
+Le proprietà garantite da questo protocollo sono tre:
+\begin{enumerate}
+    \item \textbf{Operazioni Trustless:} i nodi che fanno parte del percorso di un pagamento non devono fidarsi l'uno dell'altro. La crittografia e il protocollo proteggono i fondi da furti o appropriazioni indebite.
+    \item \textbf{Atomicità:} il pagamento è un'operazione atomica, o vengono eseguiti tutti i passaggi ed i fondi raggiungono il destinatario, oppure fallisce completamente e tutti i fondi vengono rimborsati ai rispettivi proprietari. Non esiste alcuno stato intermedio.
+    \item \textbf{Sicurezza Multi-hop:} La sicurezza del sistema non degrada con l'aumentare della lunghezza del percorso.
+\end{enumerate}
+
+L'Onion Routing assicura che il contenuto dei pagamenti e il percorso rimangano segreti durante il transito, ma il fatto che il grafo dei canali e le dinamiche di routing siano pubbliche espongono la rete ad altre tipologie di analisi. Nella prossima sezione verranno esaminati i limiti della privacy.
+
+\section{Aspetti di privacy nel Lightning Network}
 %----------------------------------------------------------------------------------------
 \chapter{Limiti del Lightning Network e sviluppi futuri}
 %----------------------------------------------------------------------------------------

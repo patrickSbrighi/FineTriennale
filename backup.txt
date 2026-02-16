@@ -534,7 +534,7 @@ Si noti che questa \textbf{Closing Transaction} è simile all'ultima \textbf{Com
 Per aumentare la sicurezza, il protocollo utilizza un pratica detta \textbf{Up-front Shutdown Script}, che permette di definire l'indirizzo di chiusura già al momento dell'apertura del canale, nei messaggi \texttt{open\_channel} o \texttt{accept\_channel}. Grazie a questa pratica, se un attaccante dovesse compromettere uno dei nodi, non potrebbe in alcun modo chiudere il canale e inviare i fondi a un indirizzo diverso da quello su cui i nodi si erano già accordati. Se l'indirizzo non corrisponde, il protocollo impone alla controparte onesta di rifiutare la chiusura cooperativa \cite{antonopoulos2022masteringLN}.
 
 \subsection{Chiusura unilaterale: Force Close}
-La \textbf{chiusura unilaterale}, o \textit{Force Close}, si verifica quando un nodo decide di chiudere il canale, senza prima avvertire la controparte, pubblicando l'ultimo stato di cui ha possesso sulla blockchain. Questo scenario si verifica nel caso in cui la controparte risultasse offline, smettesse di rispondere, o iniziasse a comportarsi in modo malevolo.
+La \textbf{chiusura unilaterale}, o \textbf{Force Close}, si verifica quando un nodo decide di chiudere il canale, senza prima avvertire la controparte, pubblicando l'ultimo stato di cui ha possesso sulla blockchain. Questo scenario si verifica nel caso in cui la controparte risultasse offline, smettesse di rispondere, o iniziasse a comportarsi in modo malevolo.
 
 In questa variante, il nodo che forza la chiusura pubblica l'ultima \textbf{Commitment Transaction} valida in suo possesso. Come già discusso nella Sezione 4.2, questa transazione è asimmetrica e comporta delle penalizzazioni per chi la trasmette \cite{poon2016lightning}: infatti i fondi destinati a chi ha avviato la chiusura rimangono bloccati per un periodo definito dal parametro \texttt{to\_self\_delay}, solitamente 144 blocchi. Inoltre le commissioni di mining, ossia le \textit{fee}, sono spesso più alte rispetto alla chiusura presentata precedentemente, perché la transazione risulta più complessa ed occupa più spazio in memoria \cite{antonopoulos2022masteringLN}.
 
@@ -553,23 +553,97 @@ Per abbassare questo rischio senza costringere ogni utente a mantenere i propri 
 
 Il protocollo, definito inizialmente nel paper "Pisa" da McCorry, permette di effettuare questo \textit{outsourcing} preservando completamente la privacy dell'utente. Infatti, a meno che non si verifichi una frode, non è necessario che la torre sia a conoscenza dell'identità delle parti che hanno definito lo \textit{smart contract}, tanto meno della quantità di fondi impiegati nel canale e del contenuto delle transazioni \cite{mccorry2018pisa}.
 
-Il funzionamento si basa sull'invio di dati parziali e cifrati. Ogni volta che i nodi aggiornano lo stato del canale, il client invia alla Watchtower un pacchetto dati composto da due elementi \cite{antonopoulos2022masteringLN}:
+Il funzionamento si basa sull'invio di dati parziali e cifrati. Ogni volta che lo stato del canale viene aggiornato, il client invia alla Watchtower un pacchetto dati composto da due elementi \cite{antonopoulos2022masteringLN}:
 \begin{itemize}
-\item \textbf{Hint:} I primi 16 byte del TXID della transazione di impegno. Questo serve alla torre per scansionare la blockchain e riconoscere se una specifica transazione viene pubblicata, senza però rivelare l'intera transazione a priori.
-\item \textbf{Encrypted Blob:} Un payload cifrato che contiene la firma della \textit{Justice Transaction} e la chiave di revoca necessaria per spostare i fondi.
+\item \textbf{Hint}: i primi 16 byte del TXID della transazione di impegno. Con questo la torre scansiona la blockchain e riconosce se una specifica transazione viene pubblicata, senza però rivelare l'intera transazione a priori.
+\item \textbf{Encrypted Blob}: payload cifrato che contiene la firma della \textit{Justice Transaction} e la chiave di revoca necessaria per spostare i fondi.
 \end{itemize}
 
 La torre memorizza questi dati in un database ma non può decifrare il \textit{blob} finché non trova una corrispondenza con l'\textit{hint} sulla blockchain.
-Se la torre rileva che la controparte ha pubblicato uno stato revocato, può utilizzare i dati della transazione malevola stessa per derivare la chiave di decifratura. A quel punto, la torre decifra il blob, costruisce la transazione di penalità e la trasmette alla rete, inviando i fondi al wallet sicuro dell'utente offline e trattenendo una piccola percentuale come ricompensa per il servizio svolto \cite{mccorry2018pisa}.
+Se la torre rileva che la controparte ha pubblicato uno stato revocato, può utilizzare i dati della transazione malevola stessa per derivare la chiave di decifratura. A quel punto, la torre decifra il blob, costruisce la transazione di punizione e la trasmette alla rete, inviando i fondi al wallet definito dall'utente offline e trattenendo una piccola parte dell'importo come ricompensa per il lavoro svolto\cite{mccorry2018pisa}.
 
 Grazie a questo meccanismo, la sicurezza del canale è garantita anche se l'utente è offline, disincentivando i tentativi di frode poiché l'attaccante non può sapere se la vittima sta utilizzando una o più Watchtower per sorvegliare il canale.
 
 %----------------------------------------------------------------------------------------
 \chapter{Dal singolo canale di pagamento alla rete Lightning}
 %----------------------------------------------------------------------------------------
-Collegando più canali tra loro è possibile costruire una rete di pagamenti globale.
+Nei capitoli precedenti è stato discusso il funzionamento del protocollo originale di Bitcoin, analizzandone le principali problematiche a livello di scalabilità, ed è stato studiato il protocollo Lightning Network come soluzione. Sono poi stati visti i dettagli tecnici che permettono a tale protocollo di funzionare, ed è stato visto come rendere sicuro ed affidabile un canale di pagamento tra due nodi.
+
+Per rendere Bitcoin una moneta utilizzabile a livello globale però, non è sufficiente un solo collegamento tra due nodi, così come non è sostenibile che ogni nodo apra un canale con qualsiasi nodo con cui voglia scambiare denaro. Creare tanti canali fa aumentare i costi on-chain, perchè aumenta il numero di \textit{fee} pagate durante la chiusura, e soprattutto costringi i nodi a bloccare gran parte dei propri fondi \cite{poon2016lightning}.
+
+Diventa quindi fondamentale creare una rete di nodi, che li renda connessi tra loro anche senza collegamento diretto. Se il nodo A volesse pagare il nodo C, sapendo che il nodo B è connesso con entrambi, potrebbe utilizzare proprio questo nodo come intermediario per svolgere la sua operazione.
+
+In questo capitolo verranno quindi analizzati il protocollo di routing e gli HTLC, contratti che rendono possibile pagare nodi senza collegamento diretto, concentrandosi su come gli HTLC permettano di instradare pagamenti attraverso nodi che fungono da intermediari in modo \textit{trustless}, senza che essi possano rubare i fondi.
 
 \section{Pagamenti attraverso nodi intermedi}
+Gli \textbf{HTLC}, ossia \textbf{Hashed Timelock Contract}, sono i contratti utilizzati per permettere a nodi non direttamente collegati di effettuare dei pagamenti utilizzando nodi intermedi collegati ad entrambi \cite{poon2016lightning}.
+
+Il problema che questi contratti devono risolvere in realtà non è solo strettamente collegato alle monete digitali, ma anche alle valute fisiche. Le dinamiche da evitare, che possono accadere utilizzando degli intermediari per il pagamento, sono due: per andarle ad analizzare si suppone di avere tre nodi $A$, $B$ e $C$, e che $A$ e $C$ siano entrambi collegati con B ma non abbiano modo di comunicare tra loro direttamente. 
+\begin{itemize}
+    \item $A$ ha necessità di dare del denaro a $C$ e quindi lo dà a $B$ sperando che poi questo lo dia a $C$. $B$ potrebbe prendere i soldi e scappare.
+    \item Se invece $B$ anticipasse i soldi a $C$, $A$ avrebbe estinto il suo debito con $C$ e potrebbe non rimborsare mai $B$.
+\end{itemize}
+
+È necessario un protocollo che garantisca l'\textbf{atomicità} di queste operazioni. Un \textbf{protocollo di scambio atomico} per essere tale deve garantire queste tre condizioni \cite{herlihy2018atomic}:
+\begin{enumerate}
+    \item se tutti le parti coinvolte si attengono al protocollo e svolgono le adeguatamente i loro compiti allora verranno eseguite tutte le operazioni.
+    \item nel caso in cui qualche malintenzionato dovesse non rispettare le regole del protocollo allora sarà lui ad avere la peggio.
+    \item non deve incentivare coalizione tra parti per deviare il protocollo.
+\end{enumerate}
+
+Per soddisfare tali requisiti, il Lightning Network utilizza appunto un \textbf{Hashed Timelock Contract} sfruttando le \textit{funzioni di hash}. In questa tipologia di contratti viene memorizzata la coppia $(h,t)$, che vincola i fondi secondo due clausole condizionali:
+\begin{enumerate}
+    \item se colui che deve ricevere il pagamento riesce a fornire il segreto $s$ tale che $h = H(s)$ prima che scada il tempo $t$, allora il contratto viene eseguito e i fondi vengono trasferiti. Non c'è più alcun modo per il mittente di ritirare i propri fondi.
+    \item se il segreto $s$ non viene fornito entro il tempo $t$, i fondi vengono ridati al mittente tramite una \textit{transazione di rimborso}.
+\end{enumerate}
+
+Sebbene esistano diverse varianti di questo meccanismo \cite{herlihy2018atomic}, nel Lightning Network è il destinatario finale ad avviare il processo generando il segreto $s$, detto anche  \textit{pre-image}, calcolandone $h = H(s)$. Al mittente viene poi comunicato $h$ e utilizzato per bloccare i fondi lungo tutta la catena di nodi attraversati \cite{poon2016lightning}.
+
+Di seguito vengono trattare le due fasi in cui si svolge il pagamento.
+
+\subsection{Locking dei fondi}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/htlcAdd.png}
+    \caption[Diagramma di aggiunta HTLC]{Fase di Locking: Il nodo A invia un messaggio \texttt{update\_add\_htlc} per offrire un contratto condizionale a B. Seguono gli scambi di firme e revoche per impegnare il nuovo stato. Fonte: rielaborazione da Antonopoulos \cite{antonopoulos2022masteringLN}.}
+    \label{fig:htlc_add}
+\end{figure}
+
+Nella prima fase, detta \textit{Locking}, i contratti HTLC vengono propagati dal mittente verso il destinatario, aggiungendo output condizionale al canale già esistente. Di fatto, tornando all'esempio in cui $A$ deve pagare $C$, sarà $A$ che genera un HTLC a $B$, e di conseguenza $B$ che genera un HTLC a $C$. Come osservabile nella Figura \ref{fig:htlc_add}, l'inserimento del contratto al canale viene attuata con il messaggio \texttt{update\_add\_htlc}. Tale messaggio è composto da diversi campi, tra cui i più importanti sono \cite{antonopoulos2022masteringLN}:
+\begin{itemize}
+    \item \textbf{id}: ID del contratto appena aggiunto.
+    \item \textbf{amount\_msat}: quantità di satoshi vincolata.
+    \item \textbf{payment\_hash}: l'hash del segreto, ossia $H$.
+    \item \textbf{cltv\_expiry}: il tempo dopo il quale il mittente viene rimborsato.
+    \item \textbf{onion\_routing\_packet}: la onion-encrypted-route, che indica il prossimo nodo della catena, questo sistema verrà analizzato nella Sezione successiva.
+\end{itemize}
+
+\subsection{Unlocking dei fondi}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/htlcFinish.png}
+    \caption[Diagramma di risoluzione HTLC]{Fase di Unlocking: Il nodo B, dopo aver ricevuto la pre-image, invia \texttt{update\_fulfill\_htlc} ad A per sbloccare i fondi. Anche qui segue lo scambio di firme per consolidare il saldo. Fonte: rielaborazione da Antonopoulos \cite{antonopoulos2022masteringLN}.}
+    \label{fig:htlc_fulfill}
+\end{figure}
+La seconda fase, invece, è l'\textit{Unlocking dei fondi}. Se i contratti vengono propagati dal mittente al destinatario, i segreti $s$ seguono il percorso inverso. Quando $C$, ossia il destinatario finale del pagamento, riceve il contratto da $B$, è costratto a mostrargli il segreto $s$ per poter sbloccare i fondi. A questo punto $B$ è anch'esso entrato in possesso del segreto e quindi può rivelarlo ad $A$ per sbloccare i fondi vincolati nel loro contratto.
+Come osservabile in Figura \ref{fig:htlc_fulfill}, per trasmettere il $s$ e finalizzare il pagamento viene utilizzato il messaggio \texttt{update\_fulfill\_htlc}. Esso è composto da tre campi \cite{antonopoulos2022masteringLN}: 
+\begin{itemize}
+    \item \textbf{channel\_id}: ID del canale di Lightning.
+    \item \textbf{id}: ID del contratto HTLC in questione.
+    \item \textbf{payment\_preimage}: il segreto che sblocca i fondi.
+\end{itemize}
+
+È fondamentale notare che quest'ultimo passaggio non prova esclusivamente la conoscenza del segreto, ma serve anche a modificare lo stato del canale. Il messaggio rimuove il vincolo condizionale, imposto dall'HTLC, dalla \textit{Commitment Transaction} e accredita l'importo nel saldo principale del ricevente. Solo dopo il successivo scambio di firme, coi messaggi \texttt{commitment\_signed} e \texttt{revoke\_and\_ack}, il pagamento è considerato definitivo e il vincolo eliminato.
+
+\subsection{Vincoli temporali e sicurezza}
+Come trattato nelle Sezioni precedenti, i contratti HTLC sono strettamente legati al tempo. Quest'ultimo, infatti, è un elemento fondamentale per la sicurezza di questo meccanismo e senza di esso si andrebbe incontro al rischio che, nel caso in cui non si porti a termine l'operazione, i nodi si ritrovino con i fondi vincolati bloccati per sempre.
+
+È infatti molto importante l'ordine in cui i contratti vengono stipulati e, soprattutto, l'ordine in cui scadono i timelock. La scadenza del timelock di un contratto in entrata deve essere sempre superiore alla scadenza del timelock di un contratto in uscita, e questo deve ripetersi per tutta la catena di HTLC che si verrà a creare \cite{herlihy2018atomic}.
+
+Di fatti, se il contratto tra $A$ e $B$ scadesse nello stesso esatto momento di quello tra $B$ e $C$, nel caso in cui $C$ rivelasse all'ultimo istante il segreto a $B$, il primo riuscirebbe a sbloccare il proprio denaro, ma $B$ non avrebbe abbastanza tempo per rivelare il segreto ad $A$ e ottenere a sua volta i fondi che gli spettano.
+
+Se queste regole vengono rispettate e tutti i partecipanti alla catena collaborano correttamente, si ha la certezza che ogni operazione venga portata a termine e non accada nulla di spiacevole. Se invece per un qualsiasi motivo un nodo smettesse di collaborare, sarò proprio esso ad ottenere la conseguenza peggiore. Infatti se, in una situazione ideale in cui i timelock sono stati utilizzati nel modo giusto, $B$ decidesse di smettere di collaborare dopo aver generato il contratto con $C$, quest'ultimo otterrebbe i propri fondi con il segreto $s$, $A$ verrebbe rimborsato allo scadere del timelock, e $B$ rimarrebbe l'unico nodo ad aver perso i fondi \cite{herlihy2018atomic}.
+
 \section{Routing dei pagamenti e diffusione delle informazioni}
 \section{Aspetti di privacy nel Lightning Network}
 

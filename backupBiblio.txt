@@ -256,3 +256,30 @@
   year={2019},
   note={Introduce il concetto di Watchtowers e arbitraggio di terze parti per canali off-chain}
 }
+
+@misc{bolt4_onion,
+  title={BOLT \#4: Onion Routing Protocol},
+  author={{Lightning Network Developers}},
+  year={2016},
+  howpublished={\url{https://github.com/lightning/bolts/blob/master/04-onion-routing.md}},
+  note={Specifica del formato dei pacchetti di routing}
+}
+
+@inproceedings{danezis2009sphinx,
+  title={Sphinx: A compact and provably secure mix format},
+  author={Danezis, George and Goldberg, Ian},
+  booktitle={2009 IEEE Symposium on Security and Privacy},
+  pages={269--282},
+  year={2009},
+  organization={IEEE},
+  note={Base crittografica per l'Onion Routing in LN}
+}
+
+@inproceedings{herlihy2018atomic,
+  title={Atomic cross-chain swaps},
+  author={Herlihy, Maurice},
+  booktitle={Proceedings of the 2018 ACM symposium on principles of distributed computing},
+  pages={245--254},
+  year={2018},
+  note={Definizione formale di atomicità nei protocolli basati su hash-lock}
+}

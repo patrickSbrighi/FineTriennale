@@ -710,6 +710,35 @@ Le proprietà garantite da questo protocollo sono tre:
 L'Onion Routing assicura che il contenuto dei pagamenti e il percorso rimangano segreti durante il transito, ma il fatto che il grafo dei canali e le dinamiche di routing siano pubbliche espongono la rete ad altre tipologie di analisi. Nella prossima sezione verranno esaminati i limiti della privacy.
 
 \section{Aspetti di privacy nel Lightning Network}
+In questa sezione viene analizzato come informazioni apparentemente innocue, necessarie però per il corretto funzionamento del routing, possano essere sfruttate per dedurre dati sensibili sui partecipanti.
+
+\subsection{Analisi della topologia e correlazione Cross-Layer}
+Come detto precedentemente, il Lightning Network è una soluzione di secondo livello, che si basa sul protocollo base di Bitcoin, questa soluzione non potrebbe esistere se non avesse nulla su cui appoggiarsi. Questo però crea una superficie di attacco, detta \textit{Cross-Layer De-Anonymization}. È noto che per creare un canale sia necessaria una \textit{Funding Transaction} sulla blockchain. Analizzando la blockchain, un osservatore potrebbe identificare quale UTXO ha finanziato il canale e risalire al wallet on-chain proprietario del nodo \cite{antonopoulos2022masteringLN}.
+
+In aggiunta, il protocollo di gossip richiede che i nodi annuncino chiaramente il proprio indirizzo IP per essere raggiungibili e la propria chiave privata. Queste due semplici infomazioni, unite ad uno studio della storia delle transazioni nel nodo in questione presenti sulla blockchain, riduce drasticamente l'anonimato rispetto all'utilizzo di Bitcoin on-chain. Infatti nel protocollo originale gli indirizzi possono essere generati a ogni transazione e quindi non rimanere sempre legati ad un determinato nodo.
+
+\subsection{Balance Probing}
+Esiste una tecnica, note come \textbf{Channel Probing}, che sfrutta il meccanismo di gestione degli errori del protocollo per dedurre i saldi attuali di due nodi in un canale. Questa è una delle vulnerabilità più discusse, perché l'esatta distribuzione dei fondi all'interno di un canale in un determinato istante è un'informazione che dovrebbe rimanere privata tra le due parti.
+
+Il principio di questa tecnica, formalizzata in \cite{herrera2019difficulty}, si basa sull'invio di finti pagamenti che non possono essere finalizzati, ma che, una volta elaborati, generano messaggi di errore informativi.
+
+Se un nodo malevolo $M$ volesse conoscere il saldo del canale tra $A$ e $B$, deve dapprima generare un canale che lo connetta con $A$, dopodiché creerà un finto pagamento con un $H$ casuale, di cui nessuno conosce il segreto, e con un importo $k$. $A$ verrà utilizzato come non intermedio per arrivare a $B$ ed il pagamento potrà arrivare a destinazione, oppure fallire durante il percorso. I entrambi i casi la rete restituirà un messaggio di errore, ed in base ad esso è possibile ottenere informazioni sui saldi attuali. Esistono due scenari principali:
+\begin{enumerate}
+    \item \textbf{Unknown Payment Hash:} in questo caso il pagamento finto è arrivato a destinazione, quindi $A$ ha fondi sufficienti per inoltrare $k$ a $B$, il pagamento raggiunge $B$, ma dato che $H$ è casuale, $B$ lo rifiuta con tale errore. Si può quindi dedurre che il saldo di $A$ è $\ge k$.
+    \item \textbf{Temporary Channel Failure:} il pagamento non è arrivato a destinazione, quindi $A$ non ha fondi sufficienti e restituisce un errore di liquidità insufficiente. L'attaccante dunque deduce che il saldo di $A$ è $< k$.
+\end{enumerate}
+
+Aggiustando l'import $k$ secondo i risultati ottenuti e ripetendo la procedura, seguendo un algoritmo di \textbf{ricerca binaria}, il nodo malevolo $M$ può determinare il saldo esatto del canale al singolo satoshi in pochi secondi.
+
+Dato che i pagamenti falliti non comportano il pagamento di alcuna \textit{fee}, questa tecnica è estremamente efficace ed economica \cite{herrera2019difficulty}.
+
+\subsection{Analisi temporale del transito}
+Per quanto il sistema \textbf{Onion Routing} sia in grado di proteggere e mascherare i vari pacchetti, non è in grado di nascondere il tempo di transito degli stessi. Sebbene i pacchetti \textit{Sphinx} siano cifrati ed appaiano diversi a ogni salto, la tempistica del loro passaggio li può rendere riconoscibili.
+
+Questa vulnerabilità espone la rete ad attacchi di \textbf{correlazione temporale}. All'interno della rete possono esserci grandi entità che controllano più nodi. Supponendo che una di esse controlli due nodi distanti appartenenti ad un percorso di pagamento, questa potrebbe individuare il mittente e il destinatario di un pagamento semplicemente osservando i tempi di ingresso e uscita di pacchetti.
+Si consideri, ad esempio, il percorso $A \rightarrow M_1 \rightarrow B \rightarrow C \rightarrow M_2 \rightarrow D$, dove $M_1$ e $M_2$ sono i nodi controllati da un'eventuale entità malevola, $M_1$ riceverà in entrata il pacchetto da $A$ al tempo $t_1$, e grazie all'Onion Routing non può sapere quale nodo sarà la destinazione finale. Successivamente il nodo $M_2$ riceverà un pacchetto dal nodo $C$ al tempo $t_2$ e lo consegnerà a $D$, sempre grazie all'Onion Routing $M_2$ non è in grado di conosce il mittente del pagamento.
+
+Tuttavia, nel caso in cui i nodi $M$ raccogliessero i dati, l'entità malevola può notare che la differenza $\Delta t = t_2 - t_1$ corrisponde esattamente al tempo di rete necessario per attraversare i nodi intermedi $B$ e $C$. Se il traffico della rete non è elevato, questa coincidenza temporale permette all'entità di affermare che, con una probabilità molto alta, i due eventi appartengono allo stesso flusso. In questo modo scoprirà che $A$ sta pagando $D$, e la transazione non sarà più anonima. \cite{antonopoulos2022masteringLN}.
 %----------------------------------------------------------------------------------------
 \chapter{Limiti del Lightning Network e sviluppi futuri}
 %----------------------------------------------------------------------------------------

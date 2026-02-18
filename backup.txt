@@ -710,19 +710,19 @@ Le proprietà garantite da questo protocollo sono tre:
 L'Onion Routing assicura che il contenuto dei pagamenti e il percorso rimangano segreti durante il transito, ma il fatto che il grafo dei canali e le dinamiche di routing siano pubbliche espongono la rete ad altre tipologie di analisi. Nella prossima sezione verranno esaminati i limiti della privacy.
 
 \section{Aspetti di privacy nel Lightning Network}
-In questa sezione viene analizzato come informazioni apparentemente innocue, necessarie però per il corretto funzionamento del routing, possano essere sfruttate per dedurre dati sensibili sui partecipanti.
+Viene ora analizzato il modo in cui informazioni apparentemente innocue, ma necessarie per il corretto funzionamento del routing, possano essere sfruttate per dedurre dati sensibili sui partecipanti.
 
 \subsection{Analisi della topologia e correlazione Cross-Layer}
-Come detto precedentemente, il Lightning Network è una soluzione di secondo livello, che si basa sul protocollo base di Bitcoin, questa soluzione non potrebbe esistere se non avesse nulla su cui appoggiarsi. Questo però crea una superficie di attacco, detta \textit{Cross-Layer De-Anonymization}. È noto che per creare un canale sia necessaria una \textit{Funding Transaction} sulla blockchain. Analizzando la blockchain, un osservatore potrebbe identificare quale UTXO ha finanziato il canale e risalire al wallet on-chain proprietario del nodo \cite{antonopoulos2022masteringLN}.
+Come già detto precedentemente, il Lightning Network è una soluzione di secondo livello, che necessita quindi un layer 1 su cui basarsi, ossia protocollo di Bitcoin. Il Ligthning Network non potrebbe esistere se non avesse nulla su cui appoggiarsi. Tale esigenza però crea una superficie di attacco, conosciuta come \textit{Cross-Layer De-Anonymization}. È noto che per creare un canale sia necessaria una \textit{Funding Transaction} sulla blockchain, analizzando quest'ultima, un osservatore potrebbe identificare quale UTXO ha finanziato il canale e risalire al wallet on-chain del nodo proprietario \cite{antonopoulos2022masteringLN}.
 
-In aggiunta, il protocollo di gossip richiede che i nodi annuncino chiaramente il proprio indirizzo IP per essere raggiungibili e la propria chiave privata. Queste due semplici infomazioni, unite ad uno studio della storia delle transazioni nel nodo in questione presenti sulla blockchain, riduce drasticamente l'anonimato rispetto all'utilizzo di Bitcoin on-chain. Infatti nel protocollo originale gli indirizzi possono essere generati a ogni transazione e quindi non rimanere sempre legati ad un determinato nodo.
+In aggiunta, il protocollo di gossip richiede che i nodi annuncino chiaramente il proprio indirizzo IP, per essere raggiungibili, e la propria chiave privata. Queste due semplici informazioni, unite ad uno studio della storia delle transazioni nel nodo in questione presenti sulla blockchain, riduce drasticamente l'anonimato rispetto all'utilizzo di Bitcoin on-chain. Infatti nel protocollo originale gli indirizzi possono essere generati a ogni transazione e quindi non rimanere sempre legati ad un determinato nodo.
 
 \subsection{Balance Probing}
-Esiste una tecnica, note come \textbf{Channel Probing}, che sfrutta il meccanismo di gestione degli errori del protocollo per dedurre i saldi attuali di due nodi in un canale. Questa è una delle vulnerabilità più discusse, perché l'esatta distribuzione dei fondi all'interno di un canale in un determinato istante è un'informazione che dovrebbe rimanere privata tra le due parti.
+Esiste una tecnica, note come \textbf{Channel Probing}, che sfrutta il meccanismo di gestione degli errori del protocollo per dedurre i saldi attuali dei due nodi in un canale. Questa è una delle vulnerabilità più discusse, perché l'esatta distribuzione dei fondi all'interno di un canale in un determinato istante è un'informazione che dovrebbe rimanere privata e conosciuta solo tra le due parti.
 
-Il principio di questa tecnica, formalizzata in \cite{herrera2019difficulty}, si basa sull'invio di finti pagamenti che non possono essere finalizzati, ma che, una volta elaborati, generano messaggi di errore informativi.
+Il principio di questa tecnica, formalizzata in \cite{herrera2019difficulty}, si basa sull'invio di finti pagamenti che non possono andare a buon fine, ma che, una volta elaborati, generano messaggi di errore informativi.
 
-Se un nodo malevolo $M$ volesse conoscere il saldo del canale tra $A$ e $B$, deve dapprima generare un canale che lo connetta con $A$, dopodiché creerà un finto pagamento con un $H$ casuale, di cui nessuno conosce il segreto, e con un importo $k$. $A$ verrà utilizzato come non intermedio per arrivare a $B$ ed il pagamento potrà arrivare a destinazione, oppure fallire durante il percorso. I entrambi i casi la rete restituirà un messaggio di errore, ed in base ad esso è possibile ottenere informazioni sui saldi attuali. Esistono due scenari principali:
+Se un nodo malevolo $M$ volesse conoscere il saldo del canale tra $A$ e $B$, dovrebbe dapprima generare un canale che lo connetta con $A$, dopodiché dovrà creare un finto pagamento con un $H$ casuale, di cui nessuno conosce il segreto, e con un importo $k$. $A$ verrà utilizzato come nodo intermedio per arrivare a $B$ ed il pagamento potrà fallire una volta arrivato a destinazione, oppure durante il percorso. In entrambi i casi la rete restituirà un messaggio di errore, ed in base ad esso è possibile ottenere informazioni sui saldi attuali. Gli errori che vengono propagati sono i seguenti:
 \begin{enumerate}
     \item \textbf{Unknown Payment Hash:} in questo caso il pagamento finto è arrivato a destinazione, quindi $A$ ha fondi sufficienti per inoltrare $k$ a $B$, il pagamento raggiunge $B$, ma dato che $H$ è casuale, $B$ lo rifiuta con tale errore. Si può quindi dedurre che il saldo di $A$ è $\ge k$.
     \item \textbf{Temporary Channel Failure:} il pagamento non è arrivato a destinazione, quindi $A$ non ha fondi sufficienti e restituisce un errore di liquidità insufficiente. L'attaccante dunque deduce che il saldo di $A$ è $< k$.
@@ -733,20 +733,74 @@ Aggiustando l'import $k$ secondo i risultati ottenuti e ripetendo la procedura, 
 Dato che i pagamenti falliti non comportano il pagamento di alcuna \textit{fee}, questa tecnica è estremamente efficace ed economica \cite{herrera2019difficulty}.
 
 \subsection{Analisi temporale del transito}
-Per quanto il sistema \textbf{Onion Routing} sia in grado di proteggere e mascherare i vari pacchetti, non è in grado di nascondere il tempo di transito degli stessi. Sebbene i pacchetti \textit{Sphinx} siano cifrati ed appaiano diversi a ogni salto, la tempistica del loro passaggio li può rendere riconoscibili.
+Per quanto il sistema \textbf{Onion Routing} sia in grado di proteggere e mascherare i vari pacchetti, non è in grado di nascondere il tempo di transito degli stessi. Sebbene i pacchetti \textit{Sphinx} siano cifrati ed appaiano diversi ad ogni salto, la tempistica del loro passaggio li può rendere riconoscibili.
 
 Questa vulnerabilità espone la rete ad attacchi di \textbf{correlazione temporale}. All'interno della rete possono esserci grandi entità che controllano più nodi. Supponendo che una di esse controlli due nodi distanti appartenenti ad un percorso di pagamento, questa potrebbe individuare il mittente e il destinatario di un pagamento semplicemente osservando i tempi di ingresso e uscita di pacchetti.
 Si consideri, ad esempio, il percorso $A \rightarrow M_1 \rightarrow B \rightarrow C \rightarrow M_2 \rightarrow D$, dove $M_1$ e $M_2$ sono i nodi controllati da un'eventuale entità malevola, $M_1$ riceverà in entrata il pacchetto da $A$ al tempo $t_1$, e grazie all'Onion Routing non può sapere quale nodo sarà la destinazione finale. Successivamente il nodo $M_2$ riceverà un pacchetto dal nodo $C$ al tempo $t_2$ e lo consegnerà a $D$, sempre grazie all'Onion Routing $M_2$ non è in grado di conosce il mittente del pagamento.
 
 Tuttavia, nel caso in cui i nodi $M$ raccogliessero i dati, l'entità malevola può notare che la differenza $\Delta t = t_2 - t_1$ corrisponde esattamente al tempo di rete necessario per attraversare i nodi intermedi $B$ e $C$. Se il traffico della rete non è elevato, questa coincidenza temporale permette all'entità di affermare che, con una probabilità molto alta, i due eventi appartengono allo stesso flusso. In questo modo scoprirà che $A$ sta pagando $D$, e la transazione non sarà più anonima. \cite{antonopoulos2022masteringLN}.
+
 %----------------------------------------------------------------------------------------
-\chapter{Limiti del Lightning Network e sviluppi futuri}
+\chapter{Limiti del Lightning Network e possibili sviluppi futuri}
 %----------------------------------------------------------------------------------------
-Nonostante i vantaggi, il Lightning Network presenta ancora diversi limiti e criticità.
+Precedentemente è stata condotta un'analisi architetturale in cui è emersa la capacità del Lightning Network di estendere la scalabilità di Bitcoin, aumentandone la capacità transazionale e spostando il carico di lavoro dai miner ai singoli nodi della rete. Tuttavia, il Lightning Network opera secondo un diverso modello di sicurezza, introducendo così nuove sfide in termini di sicurezza e privacy \cite{antonopoulos2022masteringLN}.
+
+Il protocollo di Bitcoin, che funge da layer 1, privilegia la sicurezza e la decentralizzazione attraverso il broadcasting globale delle transazioni, sacrificando la scalabilità, per il \textit{trilemma della scalabilità} visto nel Capitolo 1. Il Lightning Network introduce tecniche per migliorare e rendere scalabile Bitcoin, ma deve talvolta anch'esso scendere a patti con il trilemma. Una delle differenze fondamentali risiede nella gestione dell'identità dei nodi, a differenza di Bitcoin infatti, i nodi mantengono permanentemente la propria identità e spesso utilizzano indirizzi IP statici, aumentando le possibilità di attacco attraverso analisi del traffico o denial-of-service \cite{antonopoulos2022masteringLN}.
+
+L'aggiunta di strutture, procedure e meccanismi al layer 1 introduce però anche nuove vulnerabilità e nuovi possibili problemi. Infatti il routing introduce vincoli di liquidità che nel protocollo on-chain non esistono. La riuscita di un pagamento che arriva a destinazione attraverso un determinato percorso è probabilistica e dipende interamente dalla liquidità istantanea dei nodi attraversati. L'instradamento richiede che del capitale venga temporaneamente bloccato in contratti HTLC lungo tutto il percorso, aprendo la possibilità a nodi malevoli di bloccare la liquidità di altri nodi fino ad esaurirla \cite{antonopoulos2022masteringLN}.
+
+In questo capitolo verranno analizzati questi limiti strutturali.
 
 \section{Topologia della rete e problemi di centralizzazione}
+Il Lightning Network è una rete peer-to-peer di canali di pagamento, di conseguenza molte delle proprietà vengono influenzate dalla natura della rete stessa.
+
+Quello che ci si aspetta che il grafo della rete che ogni nodo si crea, usando i canali annunciati come collegamenti, sia uguale per tutti e casuale. Esso infatti dovrebbe dipendere dalla casualità con cui un determinato nodo ha necessità di creare o chiudere un canale con un secondo nodo. Se così fosse i gradi dei nodi seguirebbero la distribuzione normale di Gauss, dunque la maggior parte di essi dovrebbe avere circa lo stesso grado e non ci dovrebbero essere nodi con gradi esageratamente alti o bassi.
+
+In realtà il grafo che si va a generare è completamente diverso. Il Lightning Netowork è una rete economica e quindi influenzata dall'economia e dalle fee. Ogni nodo all'interno della rete vuole massimizzare i suoi collegamenti per incrementare la sua efficienza e la sua connettività in modo da ottenere molte fee. Questo fenomeno rende la rete tutt'altro che casuale, la distribuzione della rete segue una funzione basata sulla \textit{legge di potenza} in cui la maggior parte dei nodi hanno poche connessioni e una piccola élite ha una grande quantità di collegamenti. In questo modo la topologia della rete assomiglia alla topologia a stella, o meglio ad una struttura \textit{Hub-and-Spoke}, in cui il centro è composto dall'élite e gli estremi da tutti gli altri nodi \cite{antonopoulos2022masteringLN}.
+
+La decentralizzazione della rete è quindi messa a rischio, questa concentrazione di potere in pochi nodi centrali, definiti come \textit{Hub}, introduce diverse criticità e riduce drasticamente la privacy degli utenti. I grandi \textit{Hub} instradando una porzione significativa del traffico globale, acquisendo una posizione privilegiata per tentare di scoprire mittenti e destinatari e per analizzare il traffico finanziario \cite{beres2019cryptoeconomic}.
+
+Con questa conformazione, infine, la rete risulta nettamente più fragile. A differenza di una rete distribuita, il malfunzionamento di pochi \textit{Hub} dominanti potrebbe isolare intere porzioni della periferia della rete. 
+
 \section{Vulnerabilità e attacchi}
+Mentre la centralizzazione rappresenta un rischio strutturale a lungo termine, i meccanismi di gestione della liquidità e i timelock espongono il Lightning Network ad attacchi immediati. Essi mirano alla disponibilità dei servizi o al furto dei fondi, a differenza degli attacchi di consenso tipici delle blockchain, come il 51\% attack. 
+
+\subsection{Griefing e Liquidity Lockup}
+Instradare un pacchetto con il Lightning Network richiede che i fondi vengano temporaneamente bloccati in un contratto HTLC lungo tutto il percorso. Sfruttando questo meccanismo è possibile effettuare un attacco di \textbf{Griefing} o \textbf{Liquidity Lockup}. In questi casi un attaccante malevolo invia una serie di pagamenti attraverso il nodo vittima, senza mai finalizzarli, ossia senza mai rivelare il segreto utile allo sblocco dei fondi, lasciandoli sospesi fino allo scadere del timelock \cite{harris2020flood}.
+
+Durante questa attesa, la capacità del canale della vittima rimane bloccata, impedendo l'instradamento di altre transazioni invece legittime. Questo attacco provoca un danno finanziaro alla vittima, che non può più ricevere le fee per l'instradamento di pagamenti reali, ma risulta economicamente gratuito per chi attacca perché nel protocollo attuale non sono previste fee per i pagamenti falliti \cite{harris2020flood}.
+
+\subsection{Slot Jamming}
+In questo frangente ad essere attaccati sono i canali, che oltre all'esaurimento della capacità finanziaria, sono soggetti anche all'esaurimenti delle risorse protocollari. Le specifiche attuali del Lightning Network impongono che un canale possa avere all'attivo un massimo di 483 HTLC concorrenti, al fine di garantire che la transazione di chiusura non superi la dimensione massima consentita in un blocco Bitcoin \cite{antonopoulos2022masteringLN}.
+
+L'attacco chiamato \textbf{Slot Jamming} si basa proprio su questo limite. Per bloccare un canale non è necessario possedere una grande quantità di fondi, bastano solo 483 micro pagamenti lasciati in sospeso composti anche solo da pochi satoshi. Anche se il canale fosse ancora a disposizione di una vasta liquidità economica, non potrebbe accettare alcuna nuova transazione perché tutti i suoi slot protocollari sono occupati. Questo rappresenta una sorta di \textbf{Denial-of-Service} a bassissimo costo ed alta efficacia \cite{antonopoulos2022masteringLN}.
+
+\subsection{Flood \& Loot}
+Quest'ultima è la vulnerabilità più critica, definita \textit{Flood \& Loot} da Harris e Zohar, combina il blocco dei canali del layer 2 con la congestione della blockchain sottostante, nel layer 1. In questo scenario, l'attaccante esegue un attacco di \textit{Griefing} su più canali della vittima e, contemporaneamente, riempie la mempool della blockchain di Bitcoin inviando un grande numero di transazione spam, facendo alzare di conseguenza le commissioni di mining \cite{harris2020flood}.
+
+La blockchain viene congestionata per impedire alla vittima di inviare la propria \textit{Justice Transaction} in tempo nel caso in cui venga pubblicato uno stato vecchio di un suo canale. Come trattato nei capitoli precedenti, se l'attaccante tentasse di chiudere il canale fraudolentemente pubblicando uno stato vecchio, inviando la Justice Transaction entro la scadenza del timelock, la vittima può ottenere tutti i fondi impegnati nel canale. Ma, a causa della congestione del Layer 1 creata dall'attaccante, la transazione di rimborso potrebbe non venire confermata in tempo dai miner, facendo così scadere il timer e permettendo all'attaccante di ottenere i fondi. Questo attacco dimostra come la sicurezza del Lightning Network sia strettamente dipendente dalla scalabilità e dallo stato della blockchain principale \cite{harris2020flood}.
+
 \section{Proposte di miglioramento e linee di ricerca}
+Per risolvere le vulnerabilità e le criticità appena discusse, i ricercatori hanno proposto diverse evoluzioni del protocollo, atte anche a migliorarne la scalabilità. Alcune richiedono modifiche al software dei nodi, mentre altre necessitano di aggiornamenti al livello base di Bitcoin.
+
+\subsection{Eltoo: rimozione della Justice Transaction}
+L'implementazione attuale, basata sulle penalità, rende la gestione dei \textit{backup} una operazione piuttosto critica. La pubblicazione accidentale di un vecchio stato comporterebbe la totale perdita dei fondi. Questo rischio, che è stato chiamato \textbf{Toxic Waste}, impedisce l'uso sicuro di backup automatici su cloud.
+
+\textbf{Eltoo} propone di introdurre un nuovo meccanismo di aggiornamento non più basato sulla punizione, ma sulla \textit{sovrascrittura}.
+
+I vari stati del canale vengono quindi ordinati temporalmente tramite numeri di sequenza, se un nodo dovesse pubblicare uno stato revocato, la controparte non deve più confiscare i fondi con una Justice Transaction, ma pubblica semplicemente una transazione di aggiornamento, detta \textbf{Update Transaction}, con un numero di sequenza superiore, che otterrà la priorità di spesa \cite{decker2018eltoo}. Così facendo eventuali errori tecnici non comporterebbero più la perdita totale dei fondi, ed inoltre, la gestione delle watchtower viene drasticamente semplificata. Tuttavia, l'implementazione di Eltoo richiede l'introduzione di un nuovo tipo di firma in Bitcoin, denominato \texttt{SIGHASH\_ANYPREVOUT}.
+
+\subsection{Channel Factories}
+Attualmente è previsto che l'apertura e la chiusura di ogni singolo canale avvenga tramite delle transazioni on-chain. Anche il Lightning Network avrebbe problemi ad essere utilizzato a livello globale, perché
+lo spazio nei blocchi di Bitcoin diverrebbe un collo di bottiglia insormontabile.
+
+Le \textbf{Channel Factories} nascono proprio per risolvere questo problema. Si tratta di un livello intermedio tra la blockchain e i canali di pagamento. Viene propagata una transazione on-chain multiparte che blocca i fondi, non più solo di una coppia di nodi, bensì di un gruppo numeroso di utenti. All'interno della \textit{factory}, gli utenti possono aprire e riorganizzare canali Lightning tra loro istantaneamente e senza costi on-chain, trasmettendo alla blockchain solo la transazione di chiusura finale del gruppo \cite{burchert2018scalable}.
+
+\subsection{PTLC e decorrelazione dei pagamenti}
+I contratti HTLC utilizzati attualmente hanno un problema: utilizzano lo stesso hash durante tutto il percorso, dando la possibilità ad un eventuale osservatore di correlare i pacchetti durante i vari salti, compromettendo la privacy della transazione.
+
+Per risolvere questa problematica è stato eseguito un aggiornamento, chiamato \textit{Taproot}, su Bitcoin, che ha aperto la strada ai \textbf{Point Time Locked Contracts (PTLC)}, contratti che sfruttano la crittografia a curve ellittiche e le firme di Schnorr.
+Con i PTLC, ogni salto del percorso utilizza un segreto matematicamente diverso ma collegato, rendendo impossibile per i nodi intermedi correlare un pagamento in ingresso con uno in uscita basandosi sull'hash \cite{antonopoulos2022masteringLN}.
 
 %----------------------------------------------------------------------------------------
 \chapter*{Conclusioni}

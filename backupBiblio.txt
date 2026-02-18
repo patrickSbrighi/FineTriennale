@@ -299,3 +299,41 @@
   pages={602--612},
   year={2019}
 }
+
+@inproceedings{beres2019cryptoeconomic,
+  title={A cryptoeconomic traffic analysis of Bitcoin's Lightning Network},
+  author={B{\'e}res, Ferenc and Seres, Istv{\'a}n A and Bencz{\'u}r, Andr{\'a}s A},
+  booktitle={Cryptoeconomic Systems},
+  year={2019},
+  note={Analisi empirica sulla formazione degli Hub e le implicazioni sulla privacy},
+  url={https://arxiv.org/abs/1911.09432}
+}
+
+@inproceedings{harris2020flood,
+  title={Flood \& loot: A systemic attack on the lightning network},
+  author={Harris, Jona and Zohar, Aviv},
+  booktitle={Proceedings of the 2nd ACM Conference on Advances in Financial Technologies},
+  pages={202--213},
+  year={2020},
+  note={Analisi degli attacchi di congestione della liquidità}
+}
+
+@misc{decker2018eltoo,
+  title={eltoo: A simple layer 2 protocol for bitcoin},
+  author={Decker, Christian and Russell, Rusty and Osuntokun, Olaoluwa},
+  year={2018},
+  howpublished={\url{https://blockstream.com/eltoo.pdf}},
+  note={Whitepaper tecnico su Eltoo e SIGHASH\_NOINPUT}
+}
+
+@article{burchert2018scalable,
+  title={Scalable funding of Bitcoin micropayment channel networks},
+  author={Burchert, Conrad and Decker, Christian and Wattenhofer, Roger},
+  journal={Royal Society Open Science},
+  volume={5},
+  number={8},
+  pages={180089},
+  year={2018},
+  publisher={The Royal Society Publishing},
+  note={Introduce il concetto di Channel Factories e scalabilità multiparte}
+}
